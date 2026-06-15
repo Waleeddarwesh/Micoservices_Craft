@@ -16,11 +16,17 @@
 
 ---
 
+## 🚧 Project Status
+
+Craft v2.0 is under active development. The core microservices structure, Docker Compose setup, shared package, and CI pipeline are implemented. Some infrastructure components, including full Traefik gateway routing and production deployment configuration, are still being finalized.
+
+---
+
 ## 📌 Overview
 
-**Craft v2.0** is a production-oriented microservices evolution of the original Craft platform: a multi-vendor handcraft marketplace combined with e-learning, real-time communication, delivery workflows, analytics, support operations, and intelligent recommendations.
+Craft v2.0 is a production-oriented microservices evolution of the original Craft platform, transforming the previous modular monolith into a distributed backend ecosystem.
 
-This version moves the platform from a modular monolithic backend into a distributed microservices ecosystem where each business domain is isolated, independently deployable, and designed for scalability.
+The platform combines a multi-vendor marketplace, e-learning, delivery workflows, real-time notifications, payments, analytics, support operations, and recommendation services. Each business domain is separated into an independently deployable service to improve scalability, maintainability, reliability, and team workflow.
 
 Craft v2.0 focuses on:
 
@@ -36,11 +42,11 @@ Craft v2.0 focuses on:
 
 ---
 
-## 🧠 From Monolith to Microservices
+## 🎯 Why Microservices?
 
-Previous Craft versions focused on building a large production-ready Django backend with e-commerce, e-learning, chat, delivery, analytics, security, support tickets, disputes, recommendations, audit logs, and GDPR-oriented privacy features.
+Craft v2.0 was created to evolve the original monolithic Craft backend into a more scalable and maintainable architecture. The goal is to isolate business domains, enable independent deployments, improve fault isolation, and make the system easier to extend with new services such as real-time notifications, analytics, and machine learning recommendations.
 
-**Craft v2.0** restructures these capabilities into independent services to improve:
+Specifically, moving to microservices improves:
 
 | Area | Improvement |
 |---|---|
@@ -75,6 +81,30 @@ Traefik API Gateway
     |
     v
 Independent Databases, Redis, Monitoring, and Internal Services
+```
+
+```mermaid
+flowchart TD
+    Client[Client Apps] --> Gateway[Traefik API Gateway]
+
+    Gateway --> Auth[Auth Service]
+    Gateway --> Catalog[Catalog Service]
+    Gateway --> Orders[Order Service]
+    Gateway --> Payments[Payment Service]
+    Gateway --> Platform[Platform Service]
+    Gateway --> Reports[Reporting Service]
+    Gateway --> Realtime[Realtime Service]
+    Gateway --> ML[ML Service]
+
+    Orders --> Catalog
+    Payments --> Orders
+    Reports --> Orders
+    Reports --> Payments
+
+    Orders --> RabbitMQ[(RabbitMQ)]
+    Payments --> RabbitMQ
+    Platform --> RabbitMQ
+    Realtime --> Redis[(Redis)]
 ```
 
 ---
@@ -278,6 +308,17 @@ On every push and pull request to the `main` branch, the CI pipeline automatical
 
 ---
 
+## ✅ Prerequisites
+
+Before running the project, make sure you have:
+
+- Docker
+- Docker Compose
+- Git
+- Python 3.11, only if running services locally outside Docker
+
+---
+
 ## 🐳 Running with Docker Compose
 
 The full microservices ecosystem can be started using Docker Compose.
@@ -430,7 +471,7 @@ Examples:
 
 ### 2. Event-Driven Communication
 
-Used for asynchronous workflows and decoupled processing.
+Used for asynchronous workflows and decoupled processing. RabbitMQ is used as the main event broker for asynchronous service-to-service communication, while Redis is used for caching and real-time WebSocket support.
 
 Examples:
 
@@ -492,6 +533,9 @@ REPORTING_DB_NAME=craft_reporting
 # Redis
 REDIS_URL=redis://redis:6379/0
 
+# RabbitMQ
+RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+
 # Stripe
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -516,14 +560,14 @@ ML_SERVICE_URL=http://ml-service:8008
 ### Rebuild One Service
 
 ```bash
-docker compose build auth-service
-docker compose up -d auth-service
+docker compose build auth_service
+docker compose up -d auth_service
 ```
 
 ### Restart One Service
 
 ```bash
-docker compose restart catalog-service
+docker compose restart catalog_service
 ```
 
 ### Open Shell Inside a Service
@@ -558,8 +602,17 @@ bash scripts/linux/test_all.sh
 
 ### 1️⃣ Fork the Repository
 
+Fork the repository using the GitHub interface, then clone your fork:
+
 ```bash
-git fork https://github.com/Waleeddarwesh/craft-v2-microservices
+git clone https://github.com/YOUR_USERNAME/craft-v2-microservices.git
+cd craft-v2-microservices
+```
+
+Or, if using GitHub CLI:
+
+```bash
+gh repo fork Waleeddarwesh/craft-v2-microservices --clone
 ```
 
 ### 2️⃣ Create a Feature Branch
@@ -583,6 +636,17 @@ git push origin feature/service-enhancement
 ### 5️⃣ Open a Pull Request
 
 Open a pull request and describe the service, feature, or infrastructure change clearly.
+
+---
+
+## 🛣️ Roadmap
+
+- Finalize Traefik gateway routing for all services
+- Add centralized logging stack
+- Add Kubernetes deployment manifests
+- Add production-ready CI/CD deployment workflow
+- Add OpenAPI aggregation for all services
+- Improve automated integration tests across services
 
 ---
 
