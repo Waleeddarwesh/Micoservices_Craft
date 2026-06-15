@@ -13,9 +13,8 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_USER: admin
-          POSTGRES_PASSWORD: adminpassword
-          POSTGRES_DB: microservices_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
@@ -51,12 +50,6 @@ jobs:
         pip install -e ../../shared/craft-common
 
     - name: Run Tests
-      env:
-        POSTGRES_DB: microservices_db
-        POSTGRES_USER: admin
-        POSTGRES_PASSWORD: adminpassword
-        POSTGRES_HOST: localhost
-        POSTGRES_PORT: 5432
       run: |
         cd services/${{ matrix.service }}
         if [ -f manage.py ]; then python manage.py test; fi
