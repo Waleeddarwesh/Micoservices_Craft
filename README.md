@@ -322,16 +322,16 @@ docker compose logs -f realtime_service
 
 Each Django microservice owns its database schema and migrations.
 
-Run migrations per service:
+Run all migrations across all services automatically using the provided helper scripts:
 
+**On Windows (PowerShell):**
+```powershell
+.\migrate_all.ps1
+```
+
+**On Linux/macOS/Git Bash:**
 ```bash
-docker compose exec admin_service python manage.py migrate
-docker compose exec auth_service python manage.py migrate
-docker compose exec catalog_service python manage.py migrate
-docker compose exec order_service python manage.py migrate
-docker compose exec payment_service python manage.py migrate
-docker compose exec platform_service python manage.py migrate
-docker compose exec reporting_service python manage.py migrate
+bash migrate_all.sh
 ```
 
 Create an admin user in the Auth Service:
@@ -384,7 +384,13 @@ curl http://localhost/api/payments/health/
 
 ## 📊 Monitoring & Observability
 
-Craft v2.0 includes monitoring infrastructure using **Prometheus** and **Grafana**.
+Craft v2.0 includes monitoring infrastructure using **Prometheus** and **Grafana**. 
+
+Since observability is resource-heavy, it is separated into its own compose file. To start the monitoring stack alongside the main services, run:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d
+```
 
 | Tool | Purpose | URL |
 |---|---|---|
@@ -442,7 +448,6 @@ Suggested documentation URLs:
 
 ```text
 http://localhost/docs/ (Secure Centralized API Documentation - requires Admin login)
-http://localhost/admin/ (Admin Panel)
 http://localhost/api/auth/docs/
 http://localhost/api/catalog/docs/
 http://localhost/api/orders/docs/
