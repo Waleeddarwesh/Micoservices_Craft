@@ -95,6 +95,7 @@
     Router.register('disputes', DisputesPage.render);
     Router.register('audit-logs', AuditLogsPage.render);
     Router.register('settings', SettingsPage.render);
+    Router.register('api-docs', ApiDocsPage.render);
 
     // Start router
     Router.init();

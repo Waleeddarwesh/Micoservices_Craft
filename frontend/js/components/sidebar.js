@@ -62,6 +62,7 @@ const Sidebar = (() => {
         {
             section: window.t('System'), items: [
                 { route: 'settings', label: window.t('Settings'), icon: 'settings' },
+                { route: 'api-docs', label: window.t('API Docs'), icon: 'audit' },
             ]
         }
     ];

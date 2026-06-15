@@ -6,6 +6,13 @@ const I18n = (() => {
     let currentLang = localStorage.getItem('craft_lang') || 'en';
 
     const DICTIONARY = {
+        "Time": "?????",
+        "Action": "???????",
+        "Resource": "??????",
+        "IP Address": "????? IP",
+        "Success": "??????",
+        "Failures": "?????",
+        " (expired)": " (????? ????????)",
         "Search orders, users, products...": "البحث في الطلبات، المستخدمين، المنتجات...",
         "Users": "المستخدمين",
         "Overview": "نظرة عامة",
