@@ -81,6 +81,7 @@ Independent Databases, Redis, Monitoring, and Internal Services
 
 | Service | Technology | Main Responsibility | Port |
 |---|---|---|---|
+| **Admin Service** | Django | Centralized Admin Panel and Secure API Documentation | `8000` |
 | **Auth Service** | Django + DRF | Users, JWT authentication, profiles, RBAC, permissions | `8001` |
 | **Catalog Service** | Django + DRF | Products, categories, materials, inventory, search, filtering | `8002` |
 | **Order Service** | Django + DRF | Cart, checkout, orders, shipping workflow, returns | `8003` |
@@ -98,6 +99,7 @@ Craft uses **Traefik** as a reverse proxy and API Gateway.
 
 | Public Path | Routed Service |
 |---|---|
+| `/admin/`, `/docs/` | Admin Service |
 | `/api/auth/` | Auth Service |
 | `/api/catalog/` | Catalog Service |
 | `/api/orders/` | Order Service |
@@ -111,6 +113,7 @@ Craft uses **Traefik** as a reverse proxy and API Gateway.
 Example:
 
 ```text
+http://localhost/admin/
 http://localhost/api/auth/
 http://localhost/api/catalog/
 http://localhost/api/orders/
@@ -124,7 +127,9 @@ http://localhost/api/payments/
 ```text
 craft-v2-microservices/
 │
+├── frontend/         # Custom Admin Dashboard SPA UI
 ├── services/
+│   ├── admin-service/
 │   ├── auth-service/
 │   ├── catalog-service/
 │   ├── order-service/
@@ -263,7 +268,7 @@ The full microservices ecosystem can be started using Docker Compose.
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/Waleeddarwesh/Micoservices_Craft.git
+git clone https://github.com/Waleeddarwesh/craft-v2-microservices.git
 cd craft-v2-microservices
 ```
 
@@ -320,6 +325,7 @@ Each Django microservice owns its database schema and migrations.
 Run migrations per service:
 
 ```bash
+docker compose exec admin_service python manage.py migrate
 docker compose exec auth_service python manage.py migrate
 docker compose exec catalog_service python manage.py migrate
 docker compose exec order_service python manage.py migrate
@@ -435,12 +441,15 @@ Each service can expose independent API documentation.
 Suggested documentation URLs:
 
 ```text
+http://localhost/docs/ (Secure Centralized API Documentation - requires Admin login)
+http://localhost/admin/ (Admin Panel)
 http://localhost/api/auth/docs/
 http://localhost/api/catalog/docs/
 http://localhost/api/orders/docs/
 http://localhost/api/payments/docs/
 http://localhost/api/platform/docs/
 http://localhost/api/reports/docs/
+http://localhost/ws/docs/
 http://localhost/api/ml/docs/
 ```
 
@@ -482,6 +491,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
 # Internal Service URLs
+ADMIN_SERVICE_URL=http://admin-service:8000
 AUTH_SERVICE_URL=http://auth-service:8001
 CATALOG_SERVICE_URL=http://catalog-service:8002
 ORDER_SERVICE_URL=http://order-service:8003
@@ -518,6 +528,7 @@ docker compose exec order_service bash
 ### Run Django Checks
 
 ```bash
+docker compose exec admin_service python manage.py check
 docker compose exec auth_service python manage.py check
 docker compose exec catalog_service python manage.py check
 ```
@@ -535,7 +546,7 @@ docker compose exec order_service python manage.py test
 ### 1️⃣ Fork the Repository
 
 ```bash
-git fork https://github.com/Waleeddarwesh/Micoservices_Craft
+git fork https://github.com/Waleeddarwesh/craft-v2-microservices
 ```
 
 ### 2️⃣ Create a Feature Branch
