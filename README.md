@@ -1,5 +1,6 @@
 # 🧶 Craft Application — v2.0 Microservices Architecture
 
+[![Microservices CI](https://github.com/Waleeddarwesh/craft-v2-microservices/actions/workflows/ci.yml/badge.svg)](https://github.com/Waleeddarwesh/craft-v2-microservices/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Django](https://img.shields.io/badge/Django-5.x-green)
 ![Django REST Framework](https://img.shields.io/badge/DRF-REST%20APIs-red)
@@ -7,6 +8,7 @@
 ![Docker](https://img.shields.io/badge/Docker-Microservices-blue)
 ![Traefik](https://img.shields.io/badge/Traefik-API%20Gateway-cyan)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Service%20Databases-336791)
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Event%20Broker-FF6600)
 ![Redis](https://img.shields.io/badge/Redis-Cache%20%26%20Events-dc382d)
 ![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-orange)
 ![Grafana](https://img.shields.io/badge/Grafana-Observability-yellow)
@@ -96,6 +98,9 @@ Independent Databases, Redis, Monitoring, and Internal Services
 ## 🚪 API Gateway Routing
 
 Craft uses **Traefik** as a reverse proxy and API Gateway.
+
+> [!NOTE]
+> **WIP Note:** The Traefik container routing configuration is currently being finalized. For local development, you may access services via their direct mapped ports or via the centralized Admin Service until the Gateway is fully deployed.
 
 | Public Path | Routed Service |
 |---|---|
@@ -258,6 +263,18 @@ Other services validate incoming tokens using shared utilities from `craft_commo
 - Product scoring
 - User interaction tracking
 - Recommendation fallback strategies
+
+---
+
+## 🚀 Continuous Integration (CI/CD)
+
+This repository is protected by a robust **GitHub Actions** Continuous Integration pipeline (`.github/workflows/ci.yml`).
+
+On every push and pull request to the `main` branch, the CI pipeline automatically:
+1. Provisions isolated **PostgreSQL** and **RabbitMQ** services.
+2. Checks out the repository and sets up the Python environment.
+3. Automatically triggers the test suite for all microservices in a parallel matrix.
+4. Builds the individual Docker images for each service to ensure successful compilation.
 
 ---
 
@@ -540,10 +557,16 @@ docker compose exec catalog_service python manage.py check
 
 ### Run Tests
 
+You can automatically run the test suite across all microservices using the provided helper scripts:
+
+**On Windows (PowerShell):**
+```powershell
+.\test_all.ps1
+```
+
+**On Linux/macOS/Git Bash:**
 ```bash
-docker compose exec auth_service python manage.py test
-docker compose exec catalog_service python manage.py test
-docker compose exec order_service python manage.py test
+bash test_all.sh
 ```
 
 ## 🤝 Contributing
