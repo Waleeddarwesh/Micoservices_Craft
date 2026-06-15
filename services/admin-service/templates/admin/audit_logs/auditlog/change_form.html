@@ -1,0 +1,82 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+{{ block.super }}
+
+<style>
+/* Syntax highlighting for JSON payload */
+.json-key { color: #17a2b8; font-weight: bold; }
+.json-string { color: #28a745; }
+.json-number { color: #ffc107; }
+.json-boolean { color: #e83e8c; font-weight: bold; }
+.json-null { color: #6c757d; font-style: italic; }
+
+.readonly-json-box {
+    background-color: var(--body-bg, #1e1e1e);
+    border: 1px solid var(--border-color, #333);
+    border-radius: 6px;
+    padding: 16px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    margin-top: 4px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function syntaxHighlight(json) {
+        if (typeof json != 'string') {
+            json = JSON.stringify(json, undefined, 4);
+        }
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+            var cls = 'json-number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'json-key';
+                } else {
+                    cls = 'json-string';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'json-boolean';
+            } else if (/null/.test(match)) {
+                cls = 'json-null';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+    }
+
+    // Find the old_value and new_value readonly fields and format them
+    const fieldsToFormat = ['old_value', 'new_value'];
+    
+    fieldsToFormat.forEach(function(fieldName) {
+        const fieldRow = document.querySelector('.field-' + fieldName);
+        if (fieldRow) {
+            const contentDiv = fieldRow.querySelector('.readonly');
+            if (contentDiv && contentDiv.textContent.trim() !== 'None' && contentDiv.textContent.trim() !== '') {
+                try {
+                    // It might already be rendered as a python dict string or valid JSON.
+                    // Let's attempt to parse it if it looks like JSON.
+                    let textContent = contentDiv.textContent.trim();
+                    // Fix single quotes to double quotes if it's a python dict string
+                    if (textContent.startsWith('{') && textContent.includes("'")) {
+                        textContent = textContent.replace(/'/g, '"');
+                    }
+                    
+                    const jsonObj = JSON.parse(textContent);
+                    const formattedHtml = syntaxHighlight(JSON.stringify(jsonObj, null, 4));
+                    
+                    contentDiv.innerHTML = '<div class="readonly-json-box">' + formattedHtml + '</div>';
+                } catch (e) {
+                    // If it fails to parse, leave it as is or wrap it in the box
+                    contentDiv.innerHTML = '<div class="readonly-json-box">' + contentDiv.textContent + '</div>';
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

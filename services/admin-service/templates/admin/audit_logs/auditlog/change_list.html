@@ -1,0 +1,231 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+<style>
+    .audit-dashboard {
+        margin-bottom: 24px;
+        color: var(--at, #333);
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+    .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .kpi-card {
+        background: var(--as, #1e1e1e);
+        border: 1px solid var(--abd, #333);
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1));
+    }
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+    .kpi-details h3 {
+        margin: 0;
+        font-size: 13px;
+        color: var(--atq, #888);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .kpi-details p {
+        margin: 4px 0 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--at, #eee);
+    }
+    .chart-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
+    }
+    @media (max-width: 900px) {
+        .chart-row { grid-template-columns: 1fr; }
+    }
+    .chart-card {
+        background: var(--as, #1e1e1e);
+        border: 1px solid var(--abd, #333);
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1));
+    }
+    .chart-card h3 {
+        margin: 0 0 16px 0;
+        font-size: 14px;
+        color: var(--at, #eee);
+        border-bottom: 1px solid var(--abd, #333);
+        padding-bottom: 12px;
+    }
+    .chart-container {
+        position: relative;
+        height: 250px;
+        width: 100%;
+    }
+</style>
+
+<div class="audit-dashboard">
+    <!-- KPI Row -->
+    <div class="kpi-row">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: rgba(127, 176, 79, 0.1); color: #7fb04f;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div class="kpi-details">
+                <h3>Total Audit Logs</h3>
+                <p>{{ total_logs }}</p>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: rgba(23, 162, 184, 0.1); color: #17a2b8;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="kpi-details">
+                <h3>Logs Today</h3>
+                <p>{{ today_logs }}</p>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: rgba(255, 193, 7, 0.1); color: #ffc107;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div class="kpi-details">
+                <h3>Unique Actors</h3>
+                <p>{{ unique_actors }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="chart-row">
+        <div class="chart-card">
+            <h3>Activity Over Last 7 Days</h3>
+            <div class="chart-container">
+                <canvas id="auditLineChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <h3>Action Distribution</h3>
+            <div class="chart-container">
+                <canvas id="auditPieChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function getThemeColors() {
+        const computed = getComputedStyle(document.documentElement);
+        return {
+            text: computed.getPropertyValue('--at').trim() || '#333',
+            grid: computed.getPropertyValue('--abd').trim() || '#eee',
+        };
+    }
+    
+    let theme = getThemeColors();
+    
+    // Set global chart defaults
+    Chart.defaults.color = theme.text;
+    Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+
+    // Data passed from Django view
+    const activityLabels = {{ activity_labels|safe }};
+    const activityData = {{ activity_data|safe }};
+    const actionLabels = {{ action_labels|safe }};
+    const actionData = {{ action_data|safe }};
+
+    // Render Line Chart
+    const lineChart = new Chart(document.getElementById('auditLineChart'), {
+        type: 'line',
+        data: {
+            labels: activityLabels,
+            datasets: [{
+                label: 'Actions Logged',
+                data: activityData,
+                borderColor: '#7fb04f',
+                backgroundColor: 'rgba(127, 176, 79, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#7fb04f',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: theme.grid, drawBorder: false },
+                    ticks: { precision: 0 }
+                },
+                x: {
+                    grid: { display: false, drawBorder: false }
+                }
+            }
+        }
+    });
+
+    // Render Doughnut Chart
+    const pieChart = new Chart(document.getElementById('auditPieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: actionLabels,
+            datasets: [{
+                data: actionData,
+                backgroundColor: [
+                    '#28a745', '#17a2b8', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
+                ],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { boxWidth: 12, usePointStyle: true, color: theme.text }
+                }
+            }
+        }
+    });
+
+    // Observe theme changes (for the toggle button)
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === "data-theme") {
+                const newTheme = getThemeColors();
+                Chart.defaults.color = newTheme.text;
+                
+                lineChart.options.scales.y.grid.color = newTheme.grid;
+                lineChart.update();
+                
+                pieChart.options.plugins.legend.labels.color = newTheme.text;
+                pieChart.update();
+            }
+        });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+});
+</script>
+
+{{ block.super }}
+{% endblock %}

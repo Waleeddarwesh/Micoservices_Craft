@@ -1,0 +1,171 @@
+name: Craft CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: craft-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      CI: "true"
+      PYTHONUNBUFFERED: "1"
+      DJANGO_ENV: development
+      DEBUG: "False"
+      SECRET_KEY: test-secret-key-for-ci
+      DATABASE_URL: sqlite:///db.sqlite3
+      REDIS_URL: redis://localhost:6379/0
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      CELERY_RESULT_BACKEND: redis://localhost:6379/0
+      EMAIL_HOST: localhost
+      EMAIL_PORT: "1025"
+      EMAIL_HOST_USER: test
+      EMAIL_HOST_PASSWORD: test
+      EMAIL_USE_TLS: "False"
+      STRIPE_SECRET_KEY: sk_test_dummy
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      CSRF_TRUSTED_ORIGINS: http://localhost,http://127.0.0.1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Django checks
+        run: |
+          python manage.py check
+
+      - name: Check migrations
+        run: |
+          python manage.py makemigrations --check --dry-run
+
+      - name: Run CLI tests
+        run: |
+          pytest tools/tests -v
+
+      - name: Run backend API tests with coverage
+        run: |
+          pytest tests -v --cov=accounts --cov=products --cov=orders --cov=payment --cov=admin_api --cov-report=term-missing
+
+      - name: Run Craft CLI version
+        run: |
+          python tools/cli.py version
+
+      - name: Run pre-deploy checks
+        run: |
+          python tools/cli.py pre-deploy
+
+  docker-build-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: quality-checks
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: craft:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  docker-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: docker-build-check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set short SHA
+        id: vars
+        run: echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: waleeddarwesh/craft:1.2
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  #commented until Server deployment to optain server ip ,username and ssh key
+  # deploy-staging:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 20
+  #   needs: docker-publish
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  #   environment:
+  #     name: staging
+
+  #   steps:
+  #     - name: Set short SHA
+  #       id: vars
+  #       run: echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+  #     - name: Deploy to VPS
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.STAGING_HOST }}
+  #         username: ${{ secrets.STAGING_USERNAME }}
+  #         key: ${{ secrets.STAGING_SSH_KEY }}
+  #         script: |
+  #           cd /opt/craft-staging
+  #           export IMAGE_TAG=1.2
+  #           docker-compose pull
+  #           docker-compose up -d
+  #           docker system prune -f

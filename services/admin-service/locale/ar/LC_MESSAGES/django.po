@@ -1,0 +1,733 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Craft\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-28 12:00+0000\n"
+"PO-Revision-Date: 2026-05-28 12:00+0000\n"
+"Last-Translator: Waleed Darwesh / AI Review\n"
+"Language-Team: Craft Arabic Localization\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+msgid "A cart already exists for this user"
+msgstr "توجد عربة تسوق بالفعل لهذا المستخدم."
+
+msgid "A return request for this product in this order already exists."
+msgstr "طلب إرجاع هذا المنتج في هذا الطلب موجود بالفعل."
+
+msgid "A supplier cannot follow themselves"
+msgstr "لا يمكن للمورّد متابعة نفسه."
+
+msgid "A supplier cannot unfollow themselves"
+msgstr "لا يمكن للمورّد إلغاء متابعة نفسه."
+
+msgid "A wishlist already exists for this user"
+msgstr "توجد قائمة أمنيات بالفعل لهذا المستخدم."
+
+msgid "Accepted"
+msgstr "مقبول"
+
+msgid "Account created successfully."
+msgstr "تم إنشاء الحساب بنجاح."
+
+msgid "Account email verified and logged in successfully."
+msgstr "تم تأكيد البريد الإلكتروني وتسجيل الدخول بنجاح."
+
+msgid "Adding this quantity of %(name)s exceeds available stock."
+msgstr "إضافة هذه الكمية من %(name)s تتجاوز المخزون المتاح."
+
+msgid "Address ID is required."
+msgstr "معرف العنوان مطلوب."
+
+msgid "Address not found or does not belong to the user."
+msgstr "العنوان غير موجود أو لا ينتمي للمستخدم."
+
+msgid "Address not found or multiple addresses found for supplier with ID %(id)s."
+msgstr "العنوان غير موجود أو تم العثور على أكثر من عنوان للمورّد صاحب المعرّف %(id)s."
+
+msgid "Admin notes are required for rejection."
+msgstr "ملاحظات المسؤول مطلوبة للرفض."
+
+msgid "An email address is required"
+msgstr "البريد الإلكتروني مطلوب."
+
+msgid "An error occurred while processing your request."
+msgstr "حدث خطأ أثناء معالجة طلبك."
+
+msgid "Approval is being processed."
+msgstr "تتم معالجة الموافقة."
+
+msgid "Approved"
+msgstr "موافق عليه"
+
+msgid "Arabic"
+msgstr "العربية"
+
+msgid "Authentication is required to make a review."
+msgstr "يجب تسجيل الدخول لإضافة تقييم."
+
+msgid "Awaiting Approval"
+msgstr "بانتظار الموافقة"
+
+msgid "Both email and OTP are required."
+msgstr "البريد الإلكتروني ورمز التحقق مطلوبان."
+
+msgid "Cancellation is being processed."
+msgstr "تتم معالجة الإلغاء."
+
+msgid "Cancelled"
+msgstr "ملغى"
+
+msgid "Cannot cancel an order that has already been paid."
+msgstr "لا يمكن إلغاء طلب تم دفعه بالفعل."
+
+msgid "Cannot cancel an order that has been delivered or marked as failed delivery."
+msgstr "لا يمكن إلغاء طلب تم تسليمه أو تمييزه كفشل في التوصيل."
+
+msgid "Cannot cancel. A shipment for this return is already in progress (status: {status})."
+msgstr "لا يمكن الإلغاء. شحنة الإرجاع قيد التنفيذ بالفعل (الحالة: {status})."
+
+msgid "Card has expired."
+msgstr "انتهت صلاحية البطاقة."
+
+msgid "Cart created successfully"
+msgstr "تم إنشاء عربة التسوق بنجاح."
+
+msgid "Cart is empty. Cannot create order."
+msgstr "عربة التسوق فارغة. لا يمكن إنشاء الطلب."
+
+msgid "Cart item deleted successfully."
+msgstr "تم حذف عنصر من عربة التسوق بنجاح."
+
+msgid "Cash Back"
+msgstr "استرداد نقدي"
+
+msgid "Changed my mind"
+msgstr "غيّرت رأيي"
+
+msgid "Collection deleted successfully."
+msgstr "تم حذف المجموعة بنجاح."
+
+msgid "Collection not found"
+msgstr "المجموعة غير موجودة"
+
+msgid "Completed"
+msgstr "مكتمل"
+
+msgid "Coupon usage limit reached for this user."
+msgstr "وصل هذا المستخدم إلى حد استخدام الكوبون."
+
+msgid "Course not found."
+msgstr "الدورة غير موجودة."
+
+msgid "Creating, updating or deleting order items for a closed order is not allowed."
+msgstr "لا يُسمح بإنشاء أو تحديث أو حذف عناصر طلب مغلق."
+
+msgid "Customer does not exist"
+msgstr "العميل غير موجود"
+
+msgid "Delivery Fee"
+msgstr "رسوم التوصيل"
+
+msgid "Delivery not found."
+msgstr "طلب التوصيل غير موجود."
+
+msgid "Delivery person not found"
+msgstr "مندوب التوصيل غير موجود"
+
+msgid "Delivery profile does not exist"
+msgstr "ملف مندوب التوصيل غير موجود"
+
+msgid "Delivery profile does not exist."
+msgstr "ملف مندوب التوصيل غير موجود."
+
+msgid "DeliveryIdentity file is required."
+msgstr "ملف هوية مندوب التوصيل مطلوب."
+
+msgid "DeliveryLicense file is required."
+msgstr "ملف رخصة مندوب التوصيل مطلوب."
+
+msgid "Discount"
+msgstr "خصم"
+
+msgid "Email Address"
+msgstr "عنوان البريد الإلكتروني"
+
+msgid "Email is not verified"
+msgstr "لم يتم تأكيد البريد الإلكتروني."
+
+msgid "Email not found."
+msgstr "البريد الإلكتروني غير موجود."
+
+msgid "English"
+msgstr "الإنجليزية"
+
+msgid "Failed"
+msgstr "فشل"
+
+msgid "Failed to send email. Please try again later."
+msgstr "فشل إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى لاحقًا."
+
+msgid "File is required."
+msgstr "الملف مطلوب."
+
+msgid "First Name"
+msgstr "الاسم الأول"
+
+msgid "First name is required"
+msgstr "الاسم الأول مطلوب"
+
+msgid "Flagged for manual review due to high amount."
+msgstr "تم تحويله للمراجعة اليدوية بسبب ارتفاع المبلغ."
+
+msgid "Followed"
+msgstr "تمت المتابعة"
+
+msgid "Insufficient balance for this order."
+msgstr "رصيد غير كافٍ لهذا الطلب."
+
+msgid "Insufficient balance for this withdrawal."
+msgstr "رصيد غير كافٍ لهذا السحب."
+
+msgid "Invalid OTP or OTP has expired."
+msgstr "رمز التحقق غير صحيح أو انتهت صلاحيته."
+
+msgid "Invalid OTP or email provided."
+msgstr "رمز التحقق أو البريد الإلكتروني غير صحيح."
+
+msgid "Invalid action"
+msgstr "إجراء غير صالح"
+
+msgid "Invalid confirmation code."
+msgstr "رمز التأكيد غير صالح."
+
+msgid "Invalid course ID."
+msgstr "معرف الدورة غير صالح."
+
+msgid "Invalid credentials, try again"
+msgstr "بيانات تسجيل الدخول غير صحيحة، حاول مرة أخرى."
+
+msgid "Invalid delivery ID."
+msgstr "معرف التوصيل غير صالح."
+
+msgid "Invalid month format. Use YYYY-MM."
+msgstr "صيغة الشهر غير صالحة. استخدم YYYY-MM."
+
+msgid "Invalid or expired coupon."
+msgstr "الكوبون غير صالح أو منتهي الصلاحية."
+
+msgid "Invalid or expired temporary token."
+msgstr "الرمز المؤقت غير صالح أو منتهي الصلاحية."
+
+msgid "Invalid or missing payment method."
+msgstr "طريقة الدفع غير صالحة أو مفقودة."
+
+msgid "Invalid password provided."
+msgstr "كلمة المرور المدخلة غير صالحة."
+
+msgid "Invalid period"
+msgstr "فترة غير صالحة"
+
+msgid "Invalid period. Choose 'this_month', 'this_year', or 'this_day'."
+msgstr "فترة غير صالحة. اختر 'this_month' أو 'this_year' أو 'this_day'."
+
+msgid "Invalid product ID."
+msgstr "معرف المنتج غير صالح."
+
+msgid "Invalid review list endpoint."
+msgstr "نقطة نهاية قائمة التقييمات غير صالحة."
+
+msgid "Invalid supplier ID."
+msgstr "معرف المورد غير صالح."
+
+msgid "Item was damaged"
+msgstr "المنتج كان تالفًا"
+
+msgid "Last Name"
+msgstr "الاسم الأخير"
+
+msgid "Last name is required"
+msgstr "الاسم الأخير مطلوب"
+
+msgid "Logged out"
+msgstr "تم تسجيل الخروج"
+
+msgid "Message field is required."
+msgstr "حقل الرسالة مطلوب."
+
+msgid "Minimum purchase amount of %(amount)s not met for this coupon."
+msgstr "لم يتم الوصول إلى الحد الأدنى للشراء المطلوب لهذا الكوبون وهو %(amount)s."
+
+msgid "Month must be between 1 and 12."
+msgstr "يجب أن يكون الشهر بين 1 و 12."
+
+msgid "New"
+msgstr "جديد"
+
+msgid "No products found for this supplier."
+msgstr "لم يتم العثور على منتجات لهذا المورد."
+
+msgid "No reviews found for this course."
+msgstr "لم يتم العثور على تقييمات لهذه الدورة."
+
+msgid "No reviews found for this delivery."
+msgstr "لم يتم العثور على تقييمات لهذا التوصيل."
+
+msgid "No reviews found for this product."
+msgstr "لم يتم العثور على تقييمات لهذا المنتج."
+
+msgid "No reviews found for this supplier."
+msgstr "لم يتم العثور على تقييمات لهذا المورد."
+
+msgid "Not as described"
+msgstr "ليس كما هو موصوف"
+
+msgid "Not authorized"
+msgstr "غير مصرح به"
+
+msgid "Notifications have been created and sent to all suppliers."
+msgstr "تم إنشاء الإشعارات وإرسالها إلى جميع الموردين."
+
+msgid "Notifications have been created and sent to all users."
+msgstr "تم إنشاء الإشعارات وإرسالها إلى جميع المستخدمين."
+
+msgid "OTP is valid."
+msgstr "رمز التحقق صالح."
+
+msgid "OTP sent to your email for password reset."
+msgstr "تم إرسال رمز التحقق إلى بريدك الإلكتروني لإعادة تعيين كلمة المرور."
+
+msgid "OTP sent to your email."
+msgstr "تم إرسال رمز التحقق إلى بريدك الإلكتروني."
+
+msgid "One-Time Passcode for Email Verification"
+msgstr "رمز التحقق لتأكيد البريد الإلكتروني"
+
+msgid "Only PDF or image files (JPEG, PNG) are allowed."
+msgstr "يُسمح فقط بملفات PDF أو صور JPEG وPNG."
+
+msgid "Only Suppliers can create products."
+msgstr "يُسمح للمورّدين فقط بإنشاء المنتجات."
+
+msgid "Order created successfully"
+msgstr "تم إنشاء الطلب بنجاح."
+
+msgid "Order has been cancelled."
+msgstr "تم إلغاء الطلب."
+
+msgid "Order not found"
+msgstr "الطلب غير موجود"
+
+msgid "Order not found or you don't have permission to view it."
+msgstr "الطلب غير موجود أو ليس لديك إذن لعرضه."
+
+msgid "Order not found."
+msgstr "الطلب غير موجود."
+
+msgid "Order totals calculated successfully"
+msgstr "تم حساب إجمالي الطلب بنجاح."
+
+msgid "Other"
+msgstr "أخرى"
+
+msgid "Password must be at least 8 characters long and contain at least one digit"
+msgstr "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل وأن تحتوي على رقم واحد على الأقل."
+
+msgid "Password reset successful."
+msgstr "تمت إعادة تعيين كلمة المرور بنجاح."
+
+msgid "Passwords do not match"
+msgstr "كلمتا المرور غير متطابقتين"
+
+msgid "Passwords do not match."
+msgstr "كلمتا المرور غير متطابقتين."
+
+msgid "Percentage discount cannot be more than 100."
+msgstr "لا يمكن أن يكون الخصم المئوي أكثر من 100."
+
+msgid "Phone number"
+msgstr "رقم الهاتف"
+
+msgid "Phone number already exists"
+msgstr "رقم الهاتف موجود بالفعل"
+
+msgid "Phone number already exists."
+msgstr "رقم الهاتف موجود بالفعل."
+
+msgid "Phone number must be in the format 01*"
+msgstr "يجب أن يبدأ رقم الهاتف بـ 01."
+
+msgid "Phone number must be in the format 01*********"
+msgstr "يجب أن يكون رقم الهاتف بالصيغة 01*********."
+
+msgid "Please enter a valid email address"
+msgstr "يرجى إدخال عنوان بريد إلكتروني صالح"
+
+msgid "Please wait 1 minute before attempting another password reset."
+msgstr "يرجى الانتظار دقيقة واحدة قبل محاولة إعادة تعيين كلمة المرور مرة أخرى."
+
+msgid "Processing"
+msgstr "قيد المعالجة"
+
+msgid "Product not found."
+msgstr "المنتج غير موجود."
+
+msgid "Provide either 'period' or 'month', not both."
+msgstr "يرجى إرسال 'period' أو 'month' فقط، وليس كليهما."
+
+msgid "Purchased Course"
+msgstr "دورة مشتراة"
+
+msgid "Purchased Products"
+msgstr "منتجات مشتراة"
+
+msgid "Quantity cannot exceed the ordered quantity ({quantity})."
+msgstr "لا يمكن أن تتجاوز الكمية الكمية المطلوبة ({quantity})."
+
+msgid "Quantity must be above 0 and less than or equal to 10"
+msgstr "يجب أن تكون الكمية أكبر من 0 وأقل من أو تساوي 10"
+
+msgid "Quantity of %(name)s exceeds available stock."
+msgstr "كمية %(name)s تتجاوز المخزون المتاح."
+
+msgid "Received wrong item"
+msgstr "تم استلام منتج غير صحيح"
+
+msgid "Redirecting to payment gateway..."
+msgstr "يتم الآن تحويلك إلى بوابة الدفع..."
+
+msgid "Refund Failed"
+msgstr "فشل استرداد الأموال"
+
+msgid "Rejected"
+msgstr "مرفوض"
+
+msgid "Rejection is being processed."
+msgstr "جاري معالجة الرفض."
+
+msgid "Requested"
+msgstr "مطلوب"
+
+msgid "Return Credit"
+msgstr "رصيد مرتجع"
+
+msgid "Return Debit"
+msgstr "خصم مرتجع"
+
+msgid "Return cannot be approved until the item has been delivered to the supplier."
+msgstr "لا يمكن الموافقة على الإرجاع حتى يتم تسليم المنتج إلى المورّد."
+
+msgid "Return cannot be rejected until the item has been delivered to you."
+msgstr "لا يمكن رفض الإرجاع حتى يتم تسليم المنتج إليك."
+
+msgid "Return request not found"
+msgstr "طلب الإرجاع غير موجود"
+
+msgid "Return {action}ed"
+msgstr "تم تنفيذ إجراء {action} على طلب الإرجاع"
+
+msgid "Returned Cash Back"
+msgstr "استرداد نقدي مرتجع"
+
+msgid "Returned Product"
+msgstr "منتج مرتجع"
+
+msgid "Review not found."
+msgstr "التقييم غير موجود."
+
+msgid "Shipment accepted and status updated to on my way"
+msgstr "تم قبول الشحنة وتحديث حالتها إلى: في الطريق."
+
+msgid "Shipment for order %(pk)s is now ready to ship."
+msgstr "شحنة الطلب رقم %(pk)s جاهزة للشحن الآن."
+
+msgid "Shipment not found or is already taken."
+msgstr "الشحنة غير موجودة أو تم استلامها بالفعل من مندوب آخر."
+
+msgid "Shipment not found or is not in a 'created' state."
+msgstr "الشحنة غير موجودة أو ليست في حالة 'تم الإنشاء'."
+
+msgid "Shipment not found or you are not assigned to it."
+msgstr "الشحنة غير موجودة أو لم يتم تعيينك لها."
+
+msgid "Shipment status updated to delivered successfully"
+msgstr "تم تحديث حالة الشحنة إلى تم التسليم بنجاح."
+
+msgid "Supplier Transfer"
+msgstr "تحويل للمورّد"
+
+msgid "Supplier not found"
+msgstr "المورّد غير موجود"
+
+msgid "Supplier not found."
+msgstr "المورّد غير موجود."
+
+msgid "Supplier profile does not exist"
+msgstr "ملف المورّد غير موجود"
+
+msgid "Supplier profile does not exist."
+msgstr "ملف المورّد غير موجود."
+
+msgid "SupplierContract file is required."
+msgstr "ملف عقد المورّد مطلوب."
+
+msgid "SupplierIdentity file is required."
+msgstr "ملف هوية المورّد مطلوب."
+
+msgid "Thanks for signing up! A passcode has been sent to verify your email."
+msgstr "شكرًا لتسجيلك! تم إرسال رمز تحقق لتأكيد بريدك الإلكتروني."
+
+msgid "The return request for '{product_name}' has been cancelled by the customer."
+msgstr "تم إلغاء طلب الإرجاع للمنتج '{product_name}' من قبل العميل."
+
+msgid "There is no product associated with the given ID"
+msgstr "لا يوجد منتج مرتبط بالمعرّف المحدد."
+
+msgid "These products have already been added to the collection: {duplicate_products}"
+msgstr "تمت إضافة هذه المنتجات بالفعل إلى المجموعة: {duplicate_products}"
+
+msgid "This card has expired."
+msgstr "هذه البطاقة منتهية الصلاحية."
+
+msgid "This coupon has exceeded its total usage limit."
+msgstr "تجاوز هذا الكوبون الحد الإجمالي للاستخدام."
+
+msgid "This email is already in use."
+msgstr "هذا البريد الإلكتروني مستخدم بالفعل."
+
+msgid "This email is already registered."
+msgstr "هذا البريد الإلكتروني مسجل بالفعل."
+
+msgid "This product was not found in the specified order."
+msgstr "لم يتم العثور على هذا المنتج في الطلب المحدد."
+
+msgid "This request cannot be rejected."
+msgstr "لا يمكن رفض هذا الطلب."
+
+msgid "This request is not approved for processing."
+msgstr "لم تتم الموافقة على هذا الطلب للمعالجة."
+
+msgid "This request is not awaiting approval."
+msgstr "هذا الطلب ليس في انتظار الموافقة."
+
+msgid "This return request cannot be approved. Its current status is '{status}'."
+msgstr "لا يمكن الموافقة على طلب الإرجاع هذا. حالته الحالية هي '{status}'."
+
+msgid "This return request cannot be rejected. Its current status is '{status}'."
+msgstr "لا يمكن رفض طلب الإرجاع هذا. حالته الحالية هي '{status}'."
+
+msgid "Token is expired or invalid"
+msgstr "الرمز منتهي الصلاحية أو غير صالح."
+
+msgid "Unfollowed"
+msgstr "تم إلغاء المتابعة"
+
+msgid "Updating or deleting closed order is not allowed."
+msgstr "لا يُسمح بتحديث أو حذف طلب مغلق."
+
+msgid "Upload your contract and identity documents, please."
+msgstr "يرجى تحميل مستندات العقد والهوية."
+
+msgid "User is already verified."
+msgstr "المستخدم متحقق منه بالفعل."
+
+msgid "User is not a supplier."
+msgstr "المستخدم ليس مورّدًا."
+
+msgid "User must be a customer or supplier"
+msgstr "يجب أن يكون المستخدم عميلًا أو مورّدًا."
+
+msgid "User not found"
+msgstr "المستخدم غير موجود"
+
+msgid "User with that email does not exist."
+msgstr "المستخدم بهذا البريد الإلكتروني غير موجود."
+
+msgid "Valid from date must be before valid to date."
+msgstr "يجب أن يكون تاريخ البداية قبل تاريخ النهاية."
+
+msgid "Warehouse not found for state: %(state)s"
+msgstr "لم يتم العثور على مستودع للمحافظة/المنطقة: %(state)s"
+
+msgid "Wishlist created successfully"
+msgstr "تم إنشاء قائمة الأمنيات بنجاح."
+
+msgid "Withdrawal Cancelled"
+msgstr "تم إلغاء السحب"
+
+msgid "Withdrawal Completed"
+msgstr "اكتمل السحب"
+
+msgid "Withdrawal Request"
+msgstr "طلب سحب"
+
+msgid "Withdrawal amount must be positive."
+msgstr "يجب أن يكون مبلغ السحب موجبًا."
+
+msgid "Withdrawal not found"
+msgstr "السحب غير موجود"
+
+msgid "Withdrawal {action}d"
+msgstr "تم تنفيذ إجراء {action} على طلب السحب"
+
+msgid "Wrong size or fit"
+msgstr "المقاس أو الملاءمة غير مناسبة"
+
+msgid "You are already enrolled in this course."
+msgstr "أنت مسجل بالفعل في هذه الدورة."
+
+msgid "You are not a supplier."
+msgstr "أنت لست مورّدًا."
+
+msgid "You are not allowed to access lectures for this course."
+msgstr "غير مسموح لك بالوصول إلى محاضرات هذه الدورة."
+
+msgid "You are not allowed to access this course."
+msgstr "غير مسموح لك بالوصول إلى هذه الدورة."
+
+msgid "You are not allowed to create videos for this course."
+msgstr "غير مسموح لك بإنشاء فيديوهات لهذه الدورة."
+
+msgid "You are not allowed to delete this product."
+msgstr "غير مسموح لك بحذف هذا المنتج."
+
+msgid "You are not allowed to modify this course."
+msgstr "غير مسموح لك بتعديل هذه الدورة."
+
+msgid "You are not allowed to perform this action on this video."
+msgstr "غير مسموح لك بإجراء هذا الإجراء على هذا الفيديو."
+
+msgid "You are not allowed to update this product."
+msgstr "غير مسموح لك بتحديث هذا المنتج."
+
+msgid "You are not authorized to delete this collection."
+msgstr "غير مسموح لك بحذف هذه المجموعة."
+
+msgid "You are not following this supplier"
+msgstr "أنت لا تتابع هذا المورّد."
+
+msgid "You can only add your own products. Invalid product IDs: {invalid_products}"
+msgstr "يمكنك فقط إضافة منتجاتك الخاصة. معرفات المنتجات غير الصالحة: {invalid_products}"
+
+msgid "You can only create returns for your own orders."
+msgstr "يمكنك فقط إنشاء طلبات إرجاع لطلباتك الخاصة."
+
+msgid "You can only delete your own messages."
+msgstr "يمكنك فقط حذف رسائلك الخاصة."
+
+msgid "You cannot add your own product to the cart"
+msgstr "لا يمكنك إضافة منتجك الخاص إلى عربة التسوق."
+
+msgid "You cannot add your own product to the wishlist"
+msgstr "لا يمكنك إضافة منتجك الخاص إلى قائمة الأمنيات"
+
+msgid "You cannot delete items from another user's cart."
+msgstr "لا يمكنك حذف عناصر من عربة مستخدم آخر."
+
+msgid "You cannot purchase your own course."
+msgstr "لا يمكنك شراء دورتك الخاصة."
+
+msgid "You cannot start a conversation with yourself."
+msgstr "لا يمكنك بدء محادثة مع نفسك."
+
+msgid "You do not have permission to perform this action."
+msgstr "ليس لديك إذن للقيام بهذا الإجراء."
+
+msgid "You have a new order #%(order_num)s containing %(count)s item(s)."
+msgstr "لديك طلب جديد رقم #%(order_num)s يحتوي على %(count)s عنصر/عناصر."
+
+msgid "You have already followed this supplier"
+msgstr "أنت تتابع هذا المورّد بالفعل."
+
+msgid "You have already reviewed this course."
+msgstr "لقد قمت بتقييم هذه الدورة بالفعل."
+
+msgid "You have already reviewed this delivery."
+msgstr "لقد قمت بتقييم هذا التوصيل بالفعل."
+
+msgid "You have already reviewed this product."
+msgstr "لقد قمت بتقييم هذا المنتج بالفعل."
+
+msgid "You have already reviewed this supplier."
+msgstr "لقد قمت بتقييم هذا المورد بالفعل."
+
+msgid "You have received a new return request for '{product_name}'."
+msgstr "لقد تلقيت طلب إرجاع جديد للمنتج '{product_name}'."
+
+msgid "You have received a new review on '{review_target}' from {customer_name}."
+msgstr "لقد تلقيت تقييمًا جديدًا على '{review_target}' من {customer_name}."
+
+msgid "You have successfully cancelled your return request for '{product_name}'."
+msgstr "لقد قمت بإلغاء طلب الإرجاع للمنتج '{product_name}' بنجاح."
+
+msgid "You must be a customer to make a review."
+msgstr "يجب أن تكون عميلاً لإضافة تقييم."
+
+msgid "You must provide a business address before adding a product."
+msgstr "يجب عليك إدخال عنوان العمل قبل إضافة منتج."
+
+msgid "You must provide exactly one of product_id, course_id, delivery_id, or supplier_id."
+msgstr "يجب عليك تقديم خيار واحد بالضبط من بين معرف المنتج، معرف الدورة، معرف التوصيل، أو معرف المورد."
+
+msgid "Your course is being created and will be available shortly."
+msgstr "جاري إنشاء دورتك وستكون متاحة قريباً."
+
+msgid "Your delivery account has not been accepted yet.the adminstrators will accept your documents soon "
+msgstr "لم يتم قبول حساب مندوب التوصيل الخاص بك بعد. سيراجع المسؤولون مستنداتك قريبًا."
+
+msgid "Your order #%(order_num)s has been placed successfully!"
+msgstr "تم تقديم طلبك رقم #%(order_num)s بنجاح!"
+
+msgid "Your return request for '{product_name}' has been approved."
+msgstr "تمت الموافقة على طلب الإرجاع الخاص بك للمنتج '{product_name}'."
+
+msgid "Your return request for '{product_name}' has been rejected."
+msgstr "تم رفض طلب الإرجاع الخاص بك للمنتج '{product_name}'."
+
+msgid "Your return request for '{product_name}' has been submitted."
+msgstr "تم تقديم طلب الإرجاع الخاص بك للمنتج '{product_name}'."
+
+msgid "Your return request has been created successfully."
+msgstr "تم إنشاء طلب الإرجاع الخاص بك بنجاح."
+
+msgid "Your supplier account has not been accepted yet.the adminstrators will accept your documents soon "
+msgstr "لم يتم قبول حساب المورّد الخاص بك بعد. سيراجع المسؤولون مستنداتك قريبًا."
+
+msgid "Your verification passcode has been sent to your email."
+msgstr "تم إرسال رمز التحقق الخاص بك إلى بريدك الإلكتروني."
+
+msgid "Your withdrawal of EGP {amount:.2f} is complete and has been sent."
+msgstr "اكتمل سحب مبلغ {amount:.2f} جنيه مصري وتم إرساله."
+
+msgid "Your withdrawal request for EGP {amount:.2f} has been approved."
+msgstr "تمت الموافقة على طلب السحب بقيمة {amount:.2f} جنيه مصري."
+
+msgid "Your withdrawal request for EGP {amount:.2f} has been submitted for review."
+msgstr "تم تقديم طلب السحب الخاص بك بقيمة {amount:.2f} جنيه مصري للمراجعة."
+
+msgid "Your withdrawal request for EGP {amount:.2f} was rejected. Reason: {reason}"
+msgstr "تم رفض طلب السحب الخاص بك بقيمة {amount:.2f} جنيه مصري. السبب: {reason}"
+
+msgid "Your withdrawal request is being processed."
+msgstr "جاري معالجة طلب السحب الخاص بك."
+
+msgid "\nManually approved by {admin_name} on {date}."
+msgstr "\nتمت الموافقة يدوياً بواسطة {admin_name} في {date}."
+
+msgid "\nManually rejected by {admin_name} on {date}."
+msgstr "\nتم الرفض يدوياً بواسطة {admin_name} في {date}."
+
+msgid "message deleted"
+msgstr "تم حذف الرسالة"
+
+msgid "messages marked as read"
+msgstr "تم وضع علامة مقروء على الرسائل"
+
+msgid "upload your contract please ."
+msgstr "يرجى تحميل العقد الخاص بك."
+
+msgid "{user_name} started a conversation with you."
+msgstr "بدأ {user_name} محادثة معك."

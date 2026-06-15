@@ -1,0 +1,228 @@
+# =============================================================================
+# Handcrafts — Kubernetes Deployments
+# =============================================================================
+# This manifest defines the workloads for the Handcrafts platform:
+#   - django-app       : The main Django/Daphne ASGI web server (2 replicas)
+#   - celery-worker    : Background task processor (1 replica)
+#   - celery-beat      : Periodic task scheduler (1 replica, singleton)
+#   - redis            : In-memory cache and message broker
+#
+# Before applying, make sure you have created the ConfigMap and Secret:
+#   kubectl apply -f config-secrets.yaml
+#
+# Usage:
+#   kubectl apply -f deployment.yaml
+# =============================================================================
+
+
+# ---- Django Web Application ----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-app
+  namespace: handcrafts
+  labels:
+    app.kubernetes.io/name: handcrafts
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: handcrafts-platform
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: handcrafts
+      app.kubernetes.io/component: web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: handcrafts
+        app.kubernetes.io/component: web
+    spec:
+      serviceAccountName: handcrafts-sa
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: django
+          image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/handcrafts-api:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: handcrafts-config
+            - secretRef:
+                name: handcrafts-secrets
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          # Readiness probe — K8s won't send traffic until this passes
+          readinessProbe:
+            httpGet:
+              path: /api/health/
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+          # Liveness probe — K8s will restart the pod if this fails
+          livenessProbe:
+            httpGet:
+              path: /api/health/
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+      # Spread pods across nodes for high availability
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfied: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: handcrafts
+              app.kubernetes.io/component: web
+
+---
+
+# ---- Celery Worker ----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+  namespace: handcrafts
+  labels:
+    app.kubernetes.io/name: handcrafts
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/part-of: handcrafts-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: handcrafts
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: handcrafts
+        app.kubernetes.io/component: worker
+    spec:
+      serviceAccountName: handcrafts-sa
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: celery
+          image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/handcrafts-api:latest
+          imagePullPolicy: Always
+          command: ["celery"]
+          args: ["-A", "Handcrafts", "worker", "--loglevel=info", "--concurrency=2"]
+          envFrom:
+            - configMapRef:
+                name: handcrafts-config
+            - secretRef:
+                name: handcrafts-secrets
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+---
+
+# ---- Celery Beat (Scheduler) ----
+# Only ONE replica should ever run to avoid duplicate scheduled tasks.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-beat
+  namespace: handcrafts
+  labels:
+    app.kubernetes.io/name: handcrafts
+    app.kubernetes.io/component: scheduler
+    app.kubernetes.io/part-of: handcrafts-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: handcrafts
+      app.kubernetes.io/component: scheduler
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: handcrafts
+        app.kubernetes.io/component: scheduler
+    spec:
+      serviceAccountName: handcrafts-sa
+      containers:
+        - name: celery-beat
+          image: <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/handcrafts-api:latest
+          imagePullPolicy: Always
+          command: ["celery"]
+          args: ["-A", "Handcrafts", "beat", "--loglevel=info"]
+          envFrom:
+            - configMapRef:
+                name: handcrafts-config
+            - secretRef:
+                name: handcrafts-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+---
+
+# ---- Redis ----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: handcrafts
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: handcrafts-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/component: cache
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis
+        app.kubernetes.io/component: cache
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          # Simple TCP check to make sure Redis is alive
+          readinessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 5
+            periodSeconds: 10

@@ -1,0 +1,105 @@
+---
+# =============================================================================
+# Role: webserver
+# =============================================================================
+# Installs Docker (or Podman), configures the container runtime, and sets up
+# Docker Compose for local multi-container orchestration.
+#
+# This role supports both Debian and RHEL-based systems to align with
+# the RHCSA / OpenShift (DO188) curriculum.
+# =============================================================================
+
+# ---- Docker Installation (Debian/Ubuntu) ----
+
+- name: Add Docker GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  when: ansible_os_family == "Debian"
+  tags: [docker]
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+  when: ansible_os_family == "Debian"
+  tags: [docker]
+
+- name: Install Docker Engine
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+  when: ansible_os_family == "Debian"
+  tags: [docker]
+
+# ---- Podman Installation (RHEL/CentOS) ----
+
+- name: Install Podman and Podman Compose (RHEL)
+  ansible.builtin.dnf:
+    name:
+      - podman
+      - podman-compose
+    state: present
+  when: ansible_os_family == "RedHat"
+  tags: [docker, podman]
+
+# ---- Container Runtime Configuration ----
+
+- name: Start and enable Docker service
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true
+  when: ansible_os_family == "Debian"
+  tags: [docker]
+
+- name: Add application user to the docker group
+  ansible.builtin.user:
+    name: "{{ app_user | default('handcrafts') }}"
+    groups: docker
+    append: true
+  when: ansible_os_family == "Debian"
+  tags: [docker]
+
+# ---- Application Setup ----
+
+- name: Copy docker-compose.yml to the server
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../docker-compose.yml"
+    dest: "{{ app_dir | default('/opt/handcrafts') }}/docker-compose.yml"
+    owner: "{{ app_user | default('handcrafts') }}"
+    mode: "0644"
+  tags: [deploy]
+
+- name: Copy Dockerfile to the server
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../dockerfile"
+    dest: "{{ app_dir | default('/opt/handcrafts') }}/Dockerfile"
+    owner: "{{ app_user | default('handcrafts') }}"
+    mode: "0644"
+  tags: [deploy]
+
+- name: Log rotation for Docker containers
+  ansible.builtin.copy:
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      }
+    dest: /etc/docker/daemon.json
+    mode: "0644"
+  notify: Restart Docker
+  when: ansible_os_family == "Debian"
+  tags: [docker, logging]
+
+
+# ---- Handlers ----
+# (Handlers are defined in handlers/main.yml but included inline for clarity)
