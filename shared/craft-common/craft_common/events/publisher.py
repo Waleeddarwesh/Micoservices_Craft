@@ -16,12 +16,21 @@ class EventPublisher:
     def connect(self):
         if not self._connection or self._connection.is_closed:
             parameters = pika.URLParameters(self.amqp_url)
+            parameters.heartbeat = 0
             self._connection = pika.BlockingConnection(parameters)
             self._channel = self._connection.channel()
             self._channel.exchange_declare(exchange=self.exchange_name, exchange_type='topic', durable=True)
 
     def publish(self, event: BaseEvent):
-        self.connect()
+        try:
+            self.connect()
+            self._do_publish(event)
+        except (pika.exceptions.AMQPConnectionError, pika.exceptions.StreamLostError, pika.exceptions.ChannelWrongStateError):
+            self._connection = None
+            self.connect()
+            self._do_publish(event)
+
+    def _do_publish(self, event: BaseEvent):
         routing_key = event.event_type
         message_body = event.model_dump_json()
         
