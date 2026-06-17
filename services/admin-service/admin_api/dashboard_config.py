@@ -118,7 +118,7 @@ DASHBOARD_MODULES = [
         "key": "product-moderation",
         "label": _("Product Moderation"),
         "icon": "products",
-        "roles": ["is_superuser"],
+        "roles": ["is_superuser", "is_staff"],
         "permission": "accounts.can_manage_products"
     },
     {
