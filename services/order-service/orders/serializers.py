@@ -28,44 +28,48 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model  = OrderItem
         fields = [
             "id",
-            "product_id",       # plain IntegerField — no FK to catalog-service DB
-            "product_name",     # denormalized snapshot
-            "product_price",    # denormalized snapshot at time of order
+            "product_id",
+            "product_name",
+            "supplier_id",
             "quantity",
-            "subtotal",
+            "price",
+            "color",
+            "size",
+            "created_at",
+            "updated_at"
         ]
-        read_only_fields = ["subtotal"]
-
 
 # ─── Order ────────────────────────────────────────────────────────────────────
 
 class OrderSerializer(serializers.ModelSerializer):
-    items            = OrderItemSerializer(many=True, read_only=True)
-    shipping_address = AddressSnapshotSerializer()
+    items = OrderItemSerializer(many=True, read_only=True)
+    shipping_address = AddressSnapshotSerializer(required=False)
 
     class Meta:
         model  = Order
         fields = [
             "id",
-            "user_id",           # plain IntegerField — no FK to auth-service DB
-            "status",
-            "items",
-            "shipping_address",  # stored as JSONField on the model
-            "total_price",
-            "coupon_code",
+            "order_number",
+            "user_id",
+            "address_id",
+            "payment_method",
+            "total_amount",
             "discount_amount",
+            "delivery_fee",
+            "final_amount",
+            "status",
+            "paid",
             "created_at",
             "updated_at",
+            "items",
+            "shipping_address"
         ]
-        read_only_fields = ["id", "user_id", "total_price", "created_at", "updated_at"]
+        read_only_fields = ["id", "order_number", "user_id", "total_amount", "final_amount", "created_at", "updated_at"]
 
     def create(self, validated_data):
-        items_data           = validated_data.pop("items", [])
-        shipping_address_data = validated_data.pop("shipping_address", {})
-        order = Order.objects.create(
-            **validated_data,
-            shipping_address=shipping_address_data,
-        )
+        items_data = validated_data.pop("items", [])
+        validated_data.pop("shipping_address", {})
+        order = Order.objects.create(**validated_data)
         for item_data in items_data:
             OrderItem.objects.create(order=order, **item_data)
         return order
@@ -78,13 +82,12 @@ class CartItemsSerializer(serializers.ModelSerializer):
         model  = CartItems
         fields = [
             "id",
-            "product_id",    # plain IntegerField
-            "product_name",  # denormalized
-            "unit_price",    # denormalized at time of adding to cart
-            "quantity",
-            "subtotal",
+            "CartID",
+            "product_id",
+            "Quantity",
+            "Color",
+            "Size"
         ]
-        read_only_fields = ["subtotal"]
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -92,8 +95,8 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = Cart
-        fields = ["id", "user_id", "status", "items", "total_price", "created_at"]
-        read_only_fields = ["id", "user_id", "total_price", "created_at"]
+        fields = ["id", "user_id", "items", "Created_at"]
+        read_only_fields = ["id", "user_id", "Created_at"]
 
 
 # ─── Wishlist ─────────────────────────────────────────────────────────────────
@@ -101,7 +104,7 @@ class CartSerializer(serializers.ModelSerializer):
 class WishlistItemSerializer(serializers.ModelSerializer):
     class Meta:
         model  = WishlistItem
-        fields = ["id", "product_id", "product_name", "added_at"]
+        fields = ["id", "product_id"]
 
 
 class WishlistSerializer(serializers.ModelSerializer):
@@ -109,5 +112,5 @@ class WishlistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = Wishlist
-        fields = ["id", "user_id", "items", "created_at"]
-        read_only_fields = ["id", "user_id", "created_at"]
+        fields = ["id", "user_id", "items", "Created_at"]
+        read_only_fields = ["id", "user_id", "Created_at"]

@@ -22,31 +22,25 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = [
             "id",
-            # Reviewer — identity from JWT, stored as denormalized snapshot
-            "reviewer_id",      # BigIntegerField (was FK to accounts.User)
-            "reviewer_name",    # CharField — synced from user.updated event
-            # Reviewable entity — only one of these will be set
-            "product_id",       # BigIntegerField (was FK to products.Product)
-            "product_name",     # CharField — denormalized snapshot
-            "course_id",        # BigIntegerField (was FK to course.Course)
-            "course_name",      # CharField — denormalized snapshot
-            # Review content
+            "user_id",
+            "user_name",
+            "product_id",
+            "product_name",
+            "course_id",
+            "course_name",
             "rating",
             "comment",
-            "status",           # PENDING | APPROVED | REJECTED
-            "verified_purchase",# BooleanField set by order.delivered event
-            # Timestamps
+            "status",
+            "is_verified_purchase",
             "created_at",
-            "updated_at",
         ]
         read_only_fields = [
             "id",
-            "reviewer_id",
-            "reviewer_name",
+            "user_id",
+            "user_name",
             "status",
-            "verified_purchase",
+            "is_verified_purchase",
             "created_at",
-            "updated_at",
         ]
 
     def validate(self, data):

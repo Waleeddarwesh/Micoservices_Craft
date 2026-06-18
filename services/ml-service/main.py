@@ -17,8 +17,14 @@ async def lifespan(app: FastAPI):
     yield
     logger.info("Shutting down ML service...")
 
-app = FastAPI(title="ML Service", version="1.0", lifespan=lifespan)
-
+app = FastAPI(
+    title="ML Service", 
+    version="1.0", 
+    lifespan=lifespan,
+    openapi_url="/recommendations/openapi.json",
+    docs_url="/recommendations/docs",
+    redoc_url="/recommendations/redoc"
+)
 from prometheus_fastapi_instrumentator import Instrumentator
 Instrumentator().instrument(app).expose(app)
 

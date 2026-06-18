@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
 from craft_common.views import HealthCheckView
+from drf_spectacular.views import SpectacularAPIView
 
 urlpatterns = [
+    path('accounts/api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('', include('django_prometheus.urls')),
     path('admin/auth/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
@@ -11,5 +13,3 @@ urlpatterns = [
     path('admin-api/', include('accounts.admin_urls')),
     path('health/', HealthCheckView.as_view(), name='health_check'),
 ]
-
-

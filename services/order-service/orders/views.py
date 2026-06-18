@@ -73,7 +73,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
     def get_or_create_cart(self):
         cart, _ = Cart.objects.get_or_create(
-            user_id=self.request.user_id, status="OPEN"
+            user_id=self.request.user_id
         )
         return cart
 

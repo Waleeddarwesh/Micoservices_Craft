@@ -147,6 +147,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Craft API',
+    'DESCRIPTION': 'API documentation for Craft application',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
@@ -180,6 +187,13 @@ AUTH_USER_MODEL = 'accounts.User'
 
 
 SPECTACULAR_SETTINGS = {
+    'TITLE': 'Craft API',
+    'DESCRIPTION': 'API documentation for Craft application',
+    'VERSION': 'v2.0',
+    'TOS': 'https://www.example.com/policies/terms/',
+    'CONTACT': {'email': 'Waleeddarwesh2002@gmail.com'},
+    'LICENSE': {'name': 'BSD License'},
+    'SERVE_INCLUDE_SCHEMA': False,
     'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated'],
 }
 
