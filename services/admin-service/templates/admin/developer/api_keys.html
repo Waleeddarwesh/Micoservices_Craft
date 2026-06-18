@@ -44,13 +44,13 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 font-mono text-sm text-gray-300">
-                            {{ key.key_prefix }}...
+                            {% if key.environment == 'live' %}sk_live_{% else %}sk_test_{% endif %}********************{{ key.key_prefix|slice:"-4:" }}
                         </td>
                         <td class="px-6 py-4">
                             {% if key.environment == 'live' %}
-                            <span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-1 rounded text-xs font-medium">Live</span>
+                            <span class="border border-blue-500/50 text-blue-400 px-2 py-0.5 rounded text-xs font-medium">Live</span>
                             {% else %}
-                            <span class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-2 py-1 rounded text-xs font-medium">Test</span>
+                            <span class="border border-yellow-500/50 text-yellow-500 px-2 py-0.5 rounded text-xs font-medium">Test</span>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-400">{{ key.created_at|date:"M d, Y" }}</td>
@@ -62,9 +62,12 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <div class="flex items-center justify-end gap-2">
+                            <div class="flex items-center justify-end gap-3 text-gray-400">
+                                <button class="hover:text-white transition-colors btn-copy-prefix" data-prefix="{{ key.key_prefix }}" title="Copy Key ID">
+                                    <i class="ph ph-copy text-lg"></i>
+                                </button>
                                 {% if key.is_active %}
-                                <button class="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded transition-colors btn-revoke" data-id="{{ key.id }}" title="Revoke Key">
+                                <button class="text-red-400 hover:text-red-300 hover:bg-red-400/10 p-1 rounded transition-colors btn-revoke" data-id="{{ key.id }}" title="Revoke Key">
                                     <i class="ph ph-trash text-lg"></i>
                                 </button>
                                 {% endif %}
@@ -230,7 +233,7 @@
             window.location.reload();
         });
 
-        // Copy button
+        // Copy new full key button
         document.getElementById('btn-copy-key').addEventListener('click', async () => {
             const keyInput = document.getElementById('new-full-key');
             try {
@@ -241,6 +244,25 @@
             } catch (err) {
                 console.error('Failed to copy', err);
             }
+        });
+
+        // Copy Key ID button
+        document.querySelectorAll('.btn-copy-prefix').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const prefix = e.currentTarget.getAttribute('data-prefix');
+                try {
+                    await navigator.clipboard.writeText(prefix);
+                    const icon = e.currentTarget.querySelector('i');
+                    icon.classList.replace('ph-copy', 'ph-check');
+                    icon.classList.add('text-green-400');
+                    setTimeout(() => {
+                        icon.classList.replace('ph-check', 'ph-copy');
+                        icon.classList.remove('text-green-400');
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy prefix', err);
+                }
+            });
         });
 
         // Generate Key Form Submit

@@ -3,6 +3,28 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+class APIService(models.Model):
+    STATUS_CHOICES = [
+        ('healthy', 'Healthy'),
+        ('degraded', 'Degraded'),
+        ('outage', 'Outage')
+    ]
+    
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True)
+    version = models.CharField(max_length=20, default="v1.0")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="healthy")
+    description = models.CharField(max_length=255)
+    schema_url = models.CharField(max_length=255)
+    endpoint_count = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['name']
+        
+    def __str__(self):
+        return f"{self.name} ({self.version})"
+
 class DeveloperAPIKey(models.Model):
     ENVIRONMENTS = [
         ("test", "Test"),

@@ -119,6 +119,9 @@
         <div class="h-12"></div> <!-- Padding bottom -->
     </div>
 </div>
+{% if access_token %}
+{{ access_token|json_script:"access-token-data" }}
+{% endif %}
 {% endblock %}
 
 {% block extra_scripts %}
@@ -128,10 +131,11 @@
 <script>
 window.onload = function() {
     
-    // Auto-inject JWT token if it exists in the global scope (set by backend middleware)
-    {% if access_token %}
-    window.CRAFT_ACCESS_TOKEN = "{{ access_token }}";
-    {% endif %}
+    // Auto-inject JWT token safely
+    const tokenDataElement = document.getElementById('access-token-data');
+    if (tokenDataElement) {
+        window.CRAFT_ACCESS_TOKEN = JSON.parse(tokenDataElement.textContent);
+    }
 
     var requestInterceptor = function(req) {
         if (window.CRAFT_ACCESS_TOKEN) {

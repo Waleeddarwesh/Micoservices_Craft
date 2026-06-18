@@ -5,87 +5,11 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Prefetch
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import DeveloperAPIKey, WebhookEndpoint, WebhookDelivery, ChangelogEntry
+from .models import DeveloperAPIKey, WebhookEndpoint, WebhookDelivery, ChangelogEntry, APIService
 from .services import create_api_key, verify_api_key, revoke_api_key, create_webhook_endpoint
 
 def is_superuser(user):
     return user.is_authenticated and user.is_superuser
-
-# Mock data for Phase 1
-SERVICES = [
-    {
-        "name": "Catalog & Video Service",
-        "slug": "catalog-video",
-        "version": "v2.0",
-        "status": "healthy",
-        "description": "Products, courses, videos, and catalog management APIs.",
-        "schema_url": "/product/api/schema/?v=2",
-        "endpoint_count": 42
-    },
-    {
-        "name": "Orders Service",
-        "slug": "orders",
-        "version": "v2.0",
-        "status": "healthy",
-        "description": "Manage customer orders, shopping carts, and returns.",
-        "schema_url": "/orders/api/schema/?v=2",
-        "endpoint_count": 28
-    },
-    {
-        "name": "Payments Service",
-        "slug": "payments",
-        "version": "v2.0",
-        "status": "healthy",
-        "description": "Process payments, refunds, and financial transactions.",
-        "schema_url": "/payment/api/schema/?v=2",
-        "endpoint_count": 15
-    },
-    {
-        "name": "Platform Service",
-        "slug": "platform",
-        "version": "v2.0",
-        "status": "healthy",
-        "description": "Platform-wide features like reviews, disputes, and settings.",
-        "schema_url": "/review/api/schema/?v=2",
-        "endpoint_count": 31
-    },
-    {
-        "name": "Reporting Service",
-        "slug": "reporting",
-        "version": "v2.0",
-        "status": "healthy",
-        "description": "Analytics, charts, and audit logs.",
-        "schema_url": "/reports/api/schema/?v=2",
-        "endpoint_count": 12
-    },
-    {
-        "name": "Auth Service",
-        "slug": "auth",
-        "version": "v2.0",
-        "status": "healthy",
-        "description": "User authentication, JWT generation, and OAuth integration.",
-        "schema_url": "/accounts/api/schema/?v=2",
-        "endpoint_count": 18
-    },
-    {
-        "name": "Admin API",
-        "slug": "admin",
-        "version": "v2.0",
-        "status": "healthy",
-        "description": "Central management API for the Craft Dashboard.",
-        "schema_url": "/admin-schema.json?format=openapi&v=2",
-        "endpoint_count": 56
-    },
-    {
-        "name": "ML Recommendations",
-        "slug": "ml",
-        "version": "v1.0",
-        "status": "healthy",
-        "description": "AI-driven product and course recommendations (FastAPI).",
-        "schema_url": "/recommendations/openapi.json",
-        "endpoint_count": 5
-    }
-]
 
 @user_passes_test(is_superuser, login_url='/docs/login/')
 def overview(request):
@@ -97,14 +21,15 @@ def overview(request):
         success_rate = int((successful_deliveries / total_deliveries) * 100)
         
     system_status = get_system_status()
+    services = list(APIService.objects.filter(is_active=True).order_by('name'))
     
     context = {
-        'total_services': len(SERVICES),
-        'total_endpoints': sum(s['endpoint_count'] for s in SERVICES),
+        'total_services': len(services),
+        'total_endpoints': sum(s.endpoint_count for s in services),
         'active_keys': DeveloperAPIKey.objects.filter(owner=request.user, is_active=True).count(),
         'webhook_success_rate': f"{success_rate}%",
         'status_overall': system_status['overall'],
-        'services': SERVICES,
+        'services': services,
         'recent_keys': DeveloperAPIKey.objects.filter(owner=request.user, is_active=True).order_by('-created_at')[:3],
         'latest_updates': ChangelogEntry.objects.order_by('-published_date', '-id')[:3],
         'active_tab': 'overview'
@@ -113,8 +38,9 @@ def overview(request):
 
 @user_passes_test(is_superuser, login_url='/docs/login/')
 def api_catalog(request):
+    services = APIService.objects.filter(is_active=True).order_by('name')
     context = {
-        'services': SERVICES,
+        'services': services,
         'active_tab': 'catalog'
     }
     return render(request, 'admin/developer/catalog.html', context)
@@ -124,9 +50,10 @@ def api_explorer(request):
     refresh = RefreshToken.for_user(request.user)
     refresh['roles'] = ['admin'] if request.user.is_superuser else []
     access_token = str(refresh.access_token)
+    services = APIService.objects.filter(is_active=True).order_by('name')
 
     context = {
-        'services': SERVICES,
+        'services': services,
         'active_tab': 'explorer',
         'access_token': access_token
     }
