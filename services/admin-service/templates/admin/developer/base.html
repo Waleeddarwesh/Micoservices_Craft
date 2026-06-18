@@ -101,17 +101,58 @@
 
             <!-- Right items -->
             <div class="flex items-center gap-4">
-                <button id="lang-btn" class="text-gray-400 hover:text-white transition-colors" title="Toggle Language">
-                    <span class="text-sm font-semibold">EN</span>
-                </button>
+                
+                <!-- Language Dropdown -->
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" @click.away="open = false" class="text-gray-400 hover:text-white transition-colors flex items-center gap-1" title="Toggle Language">
+                        <span class="text-sm font-semibold">EN</span>
+                        <i class="ph ph-caret-down text-xs"></i>
+                    </button>
+                    <div x-show="open" x-transition class="absolute right-0 mt-2 w-32 bg-surface border border-surface-border rounded-lg shadow-xl overflow-hidden z-50 py-1" style="display: none;">
+                        <button class="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-surface-border hover:text-white flex items-center gap-2 transition-colors">
+                            <span class="text-primary font-bold">EN</span> English
+                        </button>
+                        <button class="w-full text-left px-4 py-2 text-sm text-gray-400 hover:bg-surface-border hover:text-white flex items-center gap-2 transition-colors">
+                            <span class="font-bold">AR</span> Arabic
+                        </button>
+                    </div>
+                </div>
+
                 <div class="h-4 w-px bg-surface-border"></div>
+                
                 <button id="theme-btn" class="text-gray-400 hover:text-primary transition-colors" title="Toggle Dark/Light Mode">
                     <i id="theme-icon" class="ph ph-sun text-xl"></i>
                 </button>
-                <button id="notif-btn" class="text-gray-400 hover:text-white transition-colors relative" title="Notifications">
-                    <i class="ph ph-bell text-xl"></i>
-                    <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-surface"></span>
-                </button>
+
+                <!-- Notifications Dropdown -->
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" @click.away="open = false" class="text-gray-400 hover:text-white transition-colors relative" title="Notifications">
+                        <i class="ph ph-bell text-xl"></i>
+                        <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-surface"></span>
+                    </button>
+                    <div x-show="open" x-transition class="absolute right-0 mt-2 w-72 bg-surface border border-surface-border rounded-lg shadow-xl overflow-hidden z-50" style="display: none;">
+                        <div class="px-4 py-3 border-b border-surface-border flex justify-between items-center">
+                            <span class="text-sm font-bold text-white">Notifications</span>
+                            <span class="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">2 New</span>
+                        </div>
+                        <div class="max-h-64 overflow-y-auto">
+                            <div class="px-4 py-3 border-b border-surface-border/50 hover:bg-surface-border/20 transition-colors cursor-pointer opacity-50">
+                                <div class="text-sm font-medium text-white mb-1">Webhook Failed</div>
+                                <div class="text-xs text-red-400">Delivery to https://myapp.com/api/craft-webhook failed (500 Internal Server Error)</div>
+                                <div class="text-[10px] text-gray-500 mt-1">2 hours ago</div>
+                            </div>
+                            <div class="px-4 py-3 hover:bg-surface-border/20 transition-colors cursor-pointer">
+                                <div class="text-sm font-medium text-white mb-1">API Key Expiring</div>
+                                <div class="text-xs text-yellow-400">Your "Development Key" will expire in 3 days.</div>
+                                <div class="text-[10px] text-gray-500 mt-1">1 day ago</div>
+                            </div>
+                        </div>
+                        <div class="px-4 py-2 border-t border-surface-border text-center">
+                            <a href="#" class="text-xs font-medium text-primary hover:text-primary-dark transition-colors">Mark all as read</a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-blue-500 p-[2px] cursor-pointer" title="Profile">
                     <div class="w-full h-full rounded-full bg-surface border border-surface-border flex items-center justify-center text-xs font-bold text-white">
                         {{ request.user.username|make_list|first|upper }}
@@ -303,16 +344,10 @@
                 }
             });
 
-            // Lang & Notif Button Mock Alerts
-            document.getElementById('lang-btn').addEventListener('click', () => {
-                alert('Language switching feature coming soon!');
-            });
-            document.getElementById('notif-btn').addEventListener('click', () => {
-                alert('You have no new notifications.');
-            });
         });
     </script>
 
+    {% block modals %}{% endblock %}
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>
