@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "npx @tailwindcss/cli -i ./static/developer/css/input.css -o ./static/developer/css/output.css",
-    "watch:css": "npx @tailwindcss/cli -i ./static/developer/css/input.css -o ./static/developer/css/output.css --watch"
+    "build:css": "npx tailwindcss@3.4.17 -c tailwind.config.js -i ./static/developer/css/input.css -o ./static/developer/css/output.css",
+    "watch:css": "npx tailwindcss@3.4.17 -i ./static/developer/css/input.css -o ./static/developer/css/output.css --watch"
   },
   "keywords": [],
   "author": "",
