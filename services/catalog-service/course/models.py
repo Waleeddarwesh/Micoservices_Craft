@@ -32,12 +32,39 @@ class Course(models.Model):
         self.save(update_fields=['Rating'])
     
 class CourseVideos(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('uploading', 'Uploading'),
+        ('uploaded', 'Uploaded'),
+        ('processing', 'Processing'),
+        ('ready', 'Ready'),
+        ('failed', 'Failed'),
+    )
+
     VideoID = models.AutoField(primary_key=True)
     CourseID = models.ForeignKey(Course, on_delete=models.CASCADE)
     LectureTitle = models.CharField(max_length=100)
     VideoNo = models.IntegerField()
     Description = models.TextField()
-    VideoFile = models.FileField(upload_to='videos/%y/%m/%d')
+    
+    # Legacy direct upload field (kept for backward compatibility, made optional)
+    VideoFile = models.FileField(upload_to='videos/%y/%m/%d', null=True, blank=True)
+    
+    # Cloud storage fields
+    original_filename = models.CharField(max_length=255, null=True, blank=True)
+    storage_key = models.CharField(max_length=512, null=True, blank=True)
+    video_url = models.URLField(max_length=1024, null=True, blank=True)
+    thumbnail_url = models.URLField(max_length=1024, null=True, blank=True)
+    file_size = models.BigIntegerField(null=True, blank=True)
+    content_type = models.CharField(max_length=100, null=True, blank=True)
+    duration = models.DurationField(null=True, blank=True)
+    
+    # Upload tracking
+    upload_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    processing_error = models.TextField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         constraints = [

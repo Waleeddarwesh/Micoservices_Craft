@@ -96,6 +96,13 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Craft API',
+    'DESCRIPTION': 'API documentation for Craft application',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -109,6 +116,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 LOGGING = {
@@ -139,10 +147,36 @@ LOGGING = {
 
 AUTH_USER_MODEL = 'accounts.User'
 
+import os
+JWT_PUBLIC_KEY = env('JWT_PUBLIC_KEY', default='').replace('\\n', '\n')
+
 
 SPECTACULAR_SETTINGS = {
+    'TITLE': 'Craft API',
+    'DESCRIPTION': 'API documentation for Craft application',
+    'VERSION': 'v2.0',
+    'TOS': 'https://www.example.com/policies/terms/',
+    'CONTACT': {'email': 'Waleeddarwesh2002@gmail.com'},
+    'LICENSE': {'name': 'BSD License'},
+    'SERVE_INCLUDE_SCHEMA': False,
     'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated'],
 }
+
+# Celery Settings
+CELERY_BROKER_URL = env('RABBITMQ_URL', default='amqp://guest:guest@localhost:5672/')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = env('REDIS_URL', default='redis://localhost:6379/0')
+
+# AWS S3 Settings (for video uploads)
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default='')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default='')
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default='')
+AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='')
+AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL', default=None) # useful for minio/cloudflare R2
+VIDEO_UPLOAD_EXPIRATION = env.int('VIDEO_UPLOAD_EXPIRATION', default=3600)
+VIDEO_PLAYBACK_EXPIRATION = env.int('VIDEO_PLAYBACK_EXPIRATION', default=14400)
+MAX_VIDEO_SIZE_MB = env.int('MAX_VIDEO_SIZE_MB', default=2000)
 
 # Enable django-prometheus DB metrics
 if 'default' in DATABASES:

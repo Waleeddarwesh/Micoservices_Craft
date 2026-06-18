@@ -61,8 +61,39 @@ class CourseVideosSerializer(serializers.ModelSerializer):
             "LectureTitle",
             "Description",
             "VideoFile",
+            "original_filename",
+            "video_url",
+            "thumbnail_url",
+            "file_size",
+            "content_type",
+            "duration",
+            "upload_status",
+            "created_at",
+            "updated_at",
         ]
-        read_only_fields = ("VideoNo",)
+        read_only_fields = (
+            "VideoNo",
+            "video_url",
+            "thumbnail_url",
+            "file_size",
+            "duration",
+            "upload_status",
+            "created_at",
+            "updated_at",
+        )
+
+class VideoUploadRequestSerializer(serializers.Serializer):
+    LectureTitle = serializers.CharField(max_length=100)
+    Description = serializers.CharField(required=False, allow_blank=True)
+    original_filename = serializers.CharField(max_length=255)
+    content_type = serializers.CharField(max_length=100)
+    file_size = serializers.IntegerField()
+
+class VideoCompleteUploadSerializer(serializers.Serializer):
+    # This might include duration or other metadata sent by the frontend
+    # after successful S3 upload, if available.
+    duration = serializers.IntegerField(required=False, help_text="Duration in seconds, if known")
+
 
 class EnrollmentSerializer(serializers.ModelSerializer):
     videos = CourseVideosSerializer(

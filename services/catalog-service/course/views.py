@@ -3,6 +3,9 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 from rest_framework import generics, permissions, filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, NotFound
@@ -13,7 +16,16 @@ from rest_framework.views import APIView
 from django.utils.translation import gettext as _
 
 from .models import Course, CourseVideos, Enrollment
-from .serializers import CourseSerializer, CourseVideosSerializer, SimpleCoursesSerializer
+from .serializers import (
+    CourseSerializer, 
+    CourseVideosSerializer, 
+    SimpleCoursesSerializer,
+    VideoUploadRequestSerializer,
+    VideoCompleteUploadSerializer
+)
+from .services.video_storage_service import VideoStorageService
+from .services.video_access_service import VideoAccessService
+from .services.video_processing_tasks import process_uploaded_video
 from .permissions import IsSupplier
 # from notifications.services import create_notification_for_user
 
@@ -128,18 +140,18 @@ class LectureViewSet(viewsets.ModelViewSet, CoursePermissionMixin):
         )
 
         # Prefetch enrolled users efficiently
-        enrolled_users = User.objects.filter(
-            enrollment__Course=course
-        ).only("id", "email", "first_name")
+        # enrolled_users = User.objects.filter(
+        #     enrollment__Course=course
+        # ).only("id", "email", "first_name")
 
         # Send notification efficiently (batched)
-        for user in enrolled_users.iterator():
-            create_notification_for_user(
-                user=user,
-                message=f"A new lecture, '{video.LectureTitle}', has been added to '{course.CourseTitle}'.",
-                related_object=course,
-                image=course.Thumbnail,
-            )
+        # for user in enrolled_users.iterator():
+        #     create_notification_for_user(
+        #         user=user,
+        #         message=f"A new lecture, '{video.LectureTitle}', has been added to '{course.CourseTitle}'.",
+        #         related_object=course,
+        #         image=course.Thumbnail,
+        #     )
 
     def perform_update(self, serializer):
         self._ensure_video_owner(serializer.instance)
@@ -170,6 +182,7 @@ class SimpleCoursesListAPIView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+
     def get_queryset(self):
         queryset = (
             Course.objects.select_related("Supplier", "Supplier__user")
@@ -197,7 +210,7 @@ class OneCourseDetailAPIView(generics.RetrieveAPIView):
         is_enrolled = cache.get(cache_key)
         if is_enrolled is None:
             is_enrolled = Enrollment.objects.filter(
-                Course=course, EnrolledUser=request.user
+                Course=course, user_id=request.user.id
             ).exists()
             cache.set(cache_key, is_enrolled, 600)
 
@@ -227,7 +240,7 @@ class CourseLecturesAPIView(APIView):
             allowed = True
         else:
             allowed = Enrollment.objects.filter(
-                Course=course, EnrolledUser=request.user
+                Course=course, user_id=request.user.id
             ).exists()
 
         if not allowed:
@@ -253,9 +266,135 @@ class EnrolledCoursesAPIView(generics.ListAPIView):
         if getattr(self, 'swagger_fake_view', False) or not self.request.user.is_authenticated:
             return Course.objects.none()
         return Course.objects.filter(
-            enrollments__EnrolledUser=self.request.user
+            enrollments__user_id=self.request.user.id
         ).select_related("Supplier", "Supplier__user")
 
     @method_decorator(cache_page(60 * 15))
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+
+
+class CreateUploadURLAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsSupplier]
+
+    def post(self, request, course_id):
+        try:
+            course = Course.objects.get(pk=course_id)
+        except Course.DoesNotExist:
+            raise NotFound(_("Course not found."))
+
+        if course.Supplier_id != request.user.supplier.id:
+            raise PermissionDenied(_("You are not allowed to add videos to this course."))
+
+        serializer = VideoUploadRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        storage_service = VideoStorageService()
+        upload_data = storage_service.generate_upload_url(
+            course_id=course_id,
+            original_filename=serializer.validated_data['original_filename'],
+            content_type=serializer.validated_data['content_type']
+        )
+
+        if not upload_data:
+            return Response({"detail": _("Failed to generate upload URL.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Create the pending video record
+        max_video_no = CourseVideos.objects.filter(CourseID=course).aggregate(Max("VideoNo"))["VideoNo__max"]
+        new_video_no = (max_video_no or 0) + 1
+
+        video = CourseVideos.objects.create(
+            CourseID=course,
+            LectureTitle=serializer.validated_data['LectureTitle'],
+            Description=serializer.validated_data.get('Description', ''),
+            VideoNo=new_video_no,
+            original_filename=serializer.validated_data['original_filename'],
+            content_type=serializer.validated_data['content_type'],
+            file_size=serializer.validated_data['file_size'],
+            storage_key=upload_data['storage_key'],
+            upload_status='pending'
+        )
+
+        return Response({
+            "video_id": video.VideoID,
+            "upload_url": upload_data['upload_url'],
+            "fields": upload_data['fields']
+        }, status=status.HTTP_201_CREATED)
+
+
+class CompleteUploadAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsSupplier]
+
+    def post(self, request, video_id):
+        try:
+            video = CourseVideos.objects.select_related('CourseID').get(pk=video_id)
+        except CourseVideos.DoesNotExist:
+            raise NotFound(_("Video not found."))
+
+        if video.CourseID.Supplier_id != request.user.supplier.id:
+            raise PermissionDenied(_("You are not allowed to modify this video."))
+
+        serializer = VideoCompleteUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        video.upload_status = 'uploading' # or processing
+        if 'duration' in serializer.validated_data:
+            from datetime import timedelta
+            video.duration = timedelta(seconds=serializer.validated_data['duration'])
+        video.save(update_fields=['upload_status', 'duration'])
+
+        # Trigger Celery task
+        process_uploaded_video.delay(video.VideoID)
+
+        return Response({"detail": _("Upload completion registered. Processing started.")})
+
+
+class VideoPlaybackAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, video_id):
+        try:
+            video = CourseVideos.objects.select_related('CourseID').get(pk=video_id)
+        except CourseVideos.DoesNotExist:
+            raise NotFound(_("Video not found."))
+
+        course = video.CourseID
+        is_owner = hasattr(request.user, "supplier") and (course.Supplier_id == request.user.supplier.id)
+        is_enrolled = Enrollment.objects.filter(Course=course, user_id=request.user.id).exists()
+        
+        # Or check if user is admin, etc.
+        if not (is_enrolled or is_owner or request.user.is_staff):
+            raise PermissionDenied(_("You are not allowed to access this video."))
+
+        if video.upload_status != 'ready':
+            return Response({"detail": _("Video is still processing or not ready.")}, status=status.HTTP_400_BAD_REQUEST)
+
+        access_service = VideoAccessService()
+        playback_url = access_service.generate_playback_url(video.storage_key)
+
+        if not playback_url:
+            return Response({"detail": _("Failed to generate playback URL.")}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({
+            "playback_url": playback_url,
+            "status": video.upload_status,
+            "title": video.LectureTitle,
+            "thumbnail": video.thumbnail_url
+        })
+
+
+class VideoWebhookAPIView(APIView):
+    permission_classes = [permissions.AllowAny] # Usually validated by signature
+    
+    def post(self, request):
+        """
+        Placeholder for external video provider webhooks (e.g., Mux, AWS MediaConvert, Cloudflare Stream).
+        """
+        # Validate webhook signature here
+        
+        event_type = request.data.get('type')
+        provider_video_id = request.data.get('video_id')
+        
+        # Idempotent status update logic goes here...
+        
+        return Response({"status": "received"})

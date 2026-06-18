@@ -7,6 +7,10 @@ from .views import (
     OneCourseDetailAPIView,
     CourseLecturesAPIView,
     EnrolledCoursesAPIView,
+    CreateUploadURLAPIView,
+    CompleteUploadAPIView,
+    VideoPlaybackAPIView,
+    VideoWebhookAPIView,
 )
 
 router = DefaultRouter()
@@ -25,4 +29,10 @@ urlpatterns = [
 
     # Lectures for enrolled students and Course Supplier
     path("courses/<int:pk>/lectures/", CourseLecturesAPIView.as_view(), name="course-lectures"),
+
+    # Video Upload Flow
+    path("courses/<int:course_id>/videos/create-upload/", CreateUploadURLAPIView.as_view(), name="create-video-upload"),
+    path("videos/<int:video_id>/complete-upload/", CompleteUploadAPIView.as_view(), name="complete-video-upload"),
+    path("videos/<int:video_id>/playback/", VideoPlaybackAPIView.as_view(), name="video-playback"),
+    path("videos/webhook/", VideoWebhookAPIView.as_view(), name="video-webhook"),
 ]
