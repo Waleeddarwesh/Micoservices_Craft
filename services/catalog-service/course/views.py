@@ -1,10 +1,7 @@
-from django.db.models import F, Max, Prefetch
+from django.db.models import F, Max
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
-
-from django.contrib.auth import get_user_model
-User = get_user_model()
 
 from rest_framework import generics, permissions, filters, status, viewsets
 from rest_framework.decorators import action
@@ -27,9 +24,20 @@ from .services.video_storage_service import VideoStorageService
 from .services.video_access_service import VideoAccessService
 from .services.video_processing_tasks import process_uploaded_video
 from .permissions import IsSupplier
-# from notifications.services import create_notification_for_user
 
 
+def _get_user_id(request):
+    """Safely extract user ID from either StatelessUser or Django User."""
+    uid = getattr(request.user, 'id', None)
+    return int(uid) if uid is not None else None
+
+
+def _has_supplier_role(request):
+    """Check if the authenticated user has the supplier role in their JWT."""
+    payload = getattr(request.user, 'payload', None)
+    if payload:
+        return 'supplier' in payload.get('roles', [])
+    return hasattr(request.user, 'supplier')
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -40,11 +48,13 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 class CoursePermissionMixin:
     def _ensure_course_owner(self, course):
-        if course.Supplier_id != self.request.user.supplier.id:
+        user_id = _get_user_id(self.request)
+        if course.supplier_id != user_id:
             raise PermissionDenied(_("You are not allowed to modify this course."))
 
     def _ensure_video_owner(self, video):
-        if video.CourseID.Supplier_id != self.request.user.supplier.id:
+        user_id = _get_user_id(self.request)
+        if video.CourseID.supplier_id != user_id:
             raise PermissionDenied(_("You are not allowed to perform this action on this video."))
 
 
@@ -56,10 +66,13 @@ class CourseViewSet(viewsets.ModelViewSet, CoursePermissionMixin):
 
     def get_queryset(self):
         user = self.request.user
-        if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated or not hasattr(user, 'supplier'):
+        if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated:
             return Course.objects.none()
-        return Course.objects.select_related("Supplier", "Supplier__user").filter(Supplier=user.supplier).only(
-            "CourseID", "CourseTitle", "Description", "Thumbnail", "Supplier_id", "NumberOfUploadedLec"
+        user_id = _get_user_id(self.request)
+        if not _has_supplier_role(self.request):
+            return Course.objects.none()
+        return Course.objects.filter(supplier_id=user_id).only(
+            "CourseID", "CourseTitle", "Description", "Thumbnail", "supplier_id", "NumberOfUploadedLec"
         )
 
     # Cache list view for 15 min (public cache)
@@ -76,12 +89,12 @@ class CourseViewSet(viewsets.ModelViewSet, CoursePermissionMixin):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Offload course creation to Celery to avoid DB lock
-
+        user_id = _get_user_id(request)
+        course = serializer.save(supplier_id=user_id)
 
         return Response(
-            {"message": _("Your course is being created and will be available shortly.")},
-            status=status.HTTP_202_ACCEPTED,
+            CourseSerializer(course).data,
+            status=status.HTTP_201_CREATED,
         )
 
     def partial_update(self, request, *args, **kwargs):
@@ -95,10 +108,10 @@ class CourseViewSet(viewsets.ModelViewSet, CoursePermissionMixin):
 
     @action(detail=False, methods=["get"], url_path="my-courses")
     def list_own_courses(self, request):
-        supplier = getattr(request.user, "supplier", None)
-        if not supplier:
+        if not _has_supplier_role(request):
             raise PermissionDenied(_("You are not a supplier."))
-        queryset = self.get_queryset().filter(Supplier=supplier)
+        user_id = _get_user_id(request)
+        queryset = self.get_queryset().filter(supplier_id=user_id)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -117,41 +130,30 @@ class LectureViewSet(viewsets.ModelViewSet, CoursePermissionMixin):
 
     def get_queryset(self):
         user = self.request.user
-        if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated or not hasattr(user, 'supplier'):
+        if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated:
+            return CourseVideos.objects.none()
+        user_id = _get_user_id(self.request)
+        if not _has_supplier_role(self.request):
             return CourseVideos.objects.none()
         return CourseVideos.objects.select_related(
-            "CourseID", "CourseID__Supplier", "CourseID__Supplier__user"
-        ).filter(CourseID__Supplier=user.supplier).only("VideoID", "LectureTitle", "Description", "CourseID_id")
+            "CourseID"
+        ).filter(CourseID__supplier_id=user_id).only("VideoID", "LectureTitle", "Description", "CourseID_id")
 
     def perform_create(self, serializer):
         course = serializer.validated_data["CourseID"]
+        user_id = _get_user_id(self.request)
 
-        if course.Supplier_id != self.request.user.supplier.id:
+        if course.supplier_id != user_id:
             raise PermissionDenied(_("You are not allowed to create videos for this course."))
 
         # Use annotation + F to avoid multiple queries
         max_video_no = CourseVideos.objects.filter(CourseID=course).aggregate(Max("VideoNo"))["VideoNo__max"]
         new_video_no = (max_video_no or 0) + 1
 
-        video = serializer.save(VideoNo=new_video_no)
+        serializer.save(VideoNo=new_video_no)
 
-        Course.objects.filter(pk=course.pk).update(
-            NumberOfUploadedLec=F("NumberOfUploadedLec") + 1
-        )
-
-        # Prefetch enrolled users efficiently
-        # enrolled_users = User.objects.filter(
-        #     enrollment__Course=course
-        # ).only("id", "email", "first_name")
-
-        # Send notification efficiently (batched)
-        # for user in enrolled_users.iterator():
-        #     create_notification_for_user(
-        #         user=user,
-        #         message=f"A new lecture, '{video.LectureTitle}', has been added to '{course.CourseTitle}'.",
-        #         related_object=course,
-        #         image=course.Thumbnail,
-        #     )
+        # NOTE: NumberOfUploadedLec increment is handled by process_uploaded_video Celery task
+        # after confirming the file exists in storage. Not incremented here to avoid double-count.
 
     def perform_update(self, serializer):
         self._ensure_video_owner(serializer.instance)
@@ -174,49 +176,46 @@ class SimpleCoursesListAPIView(generics.ListAPIView):
     search_fields = [
         "@CourseTitle",
         "@Description",
-        "@Supplier__user__first_name",
-        "@Supplier__user__last_name",
     ]
 
     @method_decorator(cache_page(60 * 15))
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-
     def get_queryset(self):
-        queryset = (
-            Course.objects.select_related("Supplier", "Supplier__user")
-            .only("CourseID", "CourseTitle", "Description", "Thumbnail", "Supplier_id")
+        queryset = Course.objects.only(
+            "CourseID", "CourseTitle", "Description", "Thumbnail", "supplier_id"
         )
         user = self.request.user
         if getattr(self, 'swagger_fake_view', False) or not user.is_authenticated:
             return queryset
-        if hasattr(user, "supplier"):
-            queryset = queryset.exclude(Supplier=user.supplier)
+        # Exclude courses owned by the current supplier
+        user_id = _get_user_id(self.request)
+        if _has_supplier_role(self.request) and user_id:
+            queryset = queryset.exclude(supplier_id=user_id)
         return queryset
 
 
 class OneCourseDetailAPIView(generics.RetrieveAPIView):
-    queryset = Course.objects.select_related("Supplier", "Supplier__user")
+    queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
 
     @method_decorator(cache_page(60 * 10))
     def get(self, request, *args, **kwargs):
         course = self.get_object()
+        user_id = _get_user_id(request)
 
         # Cache enrollment check for 10 min (reduces repetitive DB hits)
-        cache_key = f"user:{request.user.id}:enrolled:{course.id}"
+        cache_key = f"user:{user_id}:enrolled:{course.CourseID}"
         is_enrolled = cache.get(cache_key)
         if is_enrolled is None:
             is_enrolled = Enrollment.objects.filter(
-                Course=course, user_id=request.user.id
+                Course=course, user_id=user_id
             ).exists()
             cache.set(cache_key, is_enrolled, 600)
 
-        is_owner = hasattr(request.user, "supplier") and (
-            course.Supplier_id == request.user.supplier.id
-        )
+        is_owner = _has_supplier_role(request) and (course.supplier_id == user_id)
 
         if not (is_enrolled or is_owner):
             raise PermissionDenied(_("You are not allowed to access this course."))
@@ -230,17 +229,18 @@ class CourseLecturesAPIView(APIView):
     @method_decorator(cache_page(60 * 5))
     def get(self, request, pk):
         try:
-            course = Course.objects.only("id", "Supplier_id").get(pk=pk)
+            course = Course.objects.only("CourseID", "supplier_id").get(pk=pk)
         except Course.DoesNotExist:
             raise NotFound(_("Course not found."))
 
+        user_id = _get_user_id(request)
+
         # Efficient permission check
-        is_supplier = getattr(request.user, "supplier", None)
-        if is_supplier and is_supplier.id == course.Supplier_id:
+        if _has_supplier_role(request) and course.supplier_id == user_id:
             allowed = True
         else:
             allowed = Enrollment.objects.filter(
-                Course=course, user_id=request.user.id
+                Course=course, user_id=user_id
             ).exists()
 
         if not allowed:
@@ -265,9 +265,10 @@ class EnrolledCoursesAPIView(generics.ListAPIView):
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False) or not self.request.user.is_authenticated:
             return Course.objects.none()
+        user_id = _get_user_id(self.request)
         return Course.objects.filter(
-            enrollments__user_id=self.request.user.id
-        ).select_related("Supplier", "Supplier__user")
+            enrollments__user_id=user_id
+        )
 
     @method_decorator(cache_page(60 * 15))
     def get(self, request, *args, **kwargs):
@@ -283,7 +284,8 @@ class CreateUploadURLAPIView(APIView):
         except Course.DoesNotExist:
             raise NotFound(_("Course not found."))
 
-        if course.Supplier_id != request.user.supplier.id:
+        user_id = _get_user_id(request)
+        if course.supplier_id != user_id:
             raise PermissionDenied(_("You are not allowed to add videos to this course."))
 
         serializer = VideoUploadRequestSerializer(data=request.data)
@@ -331,7 +333,8 @@ class CompleteUploadAPIView(APIView):
         except CourseVideos.DoesNotExist:
             raise NotFound(_("Video not found."))
 
-        if video.CourseID.Supplier_id != request.user.supplier.id:
+        user_id = _get_user_id(request)
+        if video.CourseID.supplier_id != user_id:
             raise PermissionDenied(_("You are not allowed to modify this video."))
 
         serializer = VideoCompleteUploadSerializer(data=request.data)
@@ -359,11 +362,14 @@ class VideoPlaybackAPIView(APIView):
             raise NotFound(_("Video not found."))
 
         course = video.CourseID
-        is_owner = hasattr(request.user, "supplier") and (course.Supplier_id == request.user.supplier.id)
-        is_enrolled = Enrollment.objects.filter(Course=course, user_id=request.user.id).exists()
+        user_id = _get_user_id(request)
+        is_owner = _has_supplier_role(request) and (course.supplier_id == user_id)
+        is_enrolled = Enrollment.objects.filter(Course=course, user_id=user_id).exists()
         
         # Or check if user is admin, etc.
-        if not (is_enrolled or is_owner or request.user.is_staff):
+        payload = getattr(request.user, 'payload', {}) or {}
+        is_admin = 'admin' in payload.get('roles', [])
+        if not (is_enrolled or is_owner or is_admin):
             raise PermissionDenied(_("You are not allowed to access this video."))
 
         if video.upload_status != 'ready':

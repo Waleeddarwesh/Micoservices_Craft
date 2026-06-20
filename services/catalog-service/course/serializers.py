@@ -99,13 +99,18 @@ class EnrollmentSerializer(serializers.ModelSerializer):
     videos = CourseVideosSerializer(
         source="Course.coursevideos_set", many=True, read_only=True
     )
+    course_title = serializers.CharField(
+        source="Course.CourseTitle", read_only=True
+    )
 
     class Meta:
         model = Enrollment
         fields = [
             "EnrollmentID",
             "Course",
+            "course_title",
             "user_id",
             "EnrollmentDate",
             "videos",
         ]
+

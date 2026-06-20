@@ -248,10 +248,11 @@ Other services validate incoming tokens using shared utilities from `craft_commo
 
 ### E-Learning
 
-- Supplier course publishing
-- Course enrollment
-- Video learning content
-- Progress tracking
+- Dedicated `courses` app integrated within Catalog Service
+- Multi-language support (English & Arabic) via model translation
+- Supplier course publishing and module management
+- Course enrollment and progress tracking
+- Video learning content integration
 - Course reviews and engagement
 
 ### Payments

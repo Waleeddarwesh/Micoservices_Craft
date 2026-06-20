@@ -66,7 +66,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         supplier_id is taken directly from the JWT (X-User-ID header).
         No lookup against accounts.Supplier is needed.
         """
-        product = serializer.save(supplier_id=self.request.user_id)
+        product = serializer.save(supplier_id=self.request.user.id)
         EventPublisher().publish(
             ProductCreatedEvent(
                 product_id=product.id,

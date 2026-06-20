@@ -5,8 +5,8 @@ from .views import *
 
 router=routers.DefaultRouter()
 router.register('products',ProductViewSet)
-
 router.register('collections', CollectionViewSet, basename='collection')
+router.register('categories', CategoryViewSet, basename='category')
 
 urlpatterns = [
     path('',include(router.urls)),

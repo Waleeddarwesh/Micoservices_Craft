@@ -95,12 +95,17 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+LANGUAGES = (
+    ('en', 'English'),
+    ('ar', 'Arabic'),
+)
+
 STATIC_URL = 'static/'
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Craft API',
-    'DESCRIPTION': 'API documentation for Craft application',
-    'VERSION': '1.0.0',
+    'TITLE': 'Catalog Service API',
+    'DESCRIPTION': 'API documentation for Catalog Service',
+    'VERSION': 'v2.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -151,16 +156,7 @@ import os
 JWT_PUBLIC_KEY = env('JWT_PUBLIC_KEY', default='').replace('\\n', '\n')
 
 
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Craft API',
-    'DESCRIPTION': 'API documentation for Craft application',
-    'VERSION': 'v2.0',
-    'TOS': 'https://www.example.com/policies/terms/',
-    'CONTACT': {'email': 'Waleeddarwesh2002@gmail.com'},
-    'LICENSE': {'name': 'BSD License'},
-    'SERVE_INCLUDE_SCHEMA': False,
-    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated'],
-}
+
 
 # Celery Settings
 CELERY_BROKER_URL = env('RABBITMQ_URL', default='amqp://guest:guest@localhost:5672/')
