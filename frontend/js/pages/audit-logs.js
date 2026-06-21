@@ -22,11 +22,11 @@ const AuditLogsPage = (() => {
 
     async function loadLogs() {
         try {
-            const data = await API.get('/admin-api/audit-logs/');
-            allLogs = data || [];
+            const res = await API.get('/api/audit/logs/');
+            allLogs = res.results || res || [];
             renderTable(allLogs);
         } catch(e) { 
-            document.getElementById('audit-table').innerHTML = `<div class="empty-state"><h3>Could not load audit logs</h3><p>${e.message}</p></div>`; 
+            document.getElementById('audit-table').innerHTML = \`<div class="empty-state"><h3>Could not load audit logs</h3><p>\${e.message}</p></div>\`; 
         }
     }
 
@@ -35,15 +35,31 @@ const AuditLogsPage = (() => {
             columns: [
                 { key: 'timestamp', label: 'Time', render: v => {
                     const d = new Date(v);
-                    return `<span style="font-family:var(--font-mono);font-size:var(--fs-xs)">${d.toLocaleDateString()} ${d.toLocaleTimeString()}</span>`;
+                    return \`<span style="font-family:var(--font-mono);font-size:var(--fs-xs)">\${d.toLocaleDateString()} \${d.toLocaleTimeString()}</span>\`;
                 }},
-                { key: 'user', label: 'User', render: v => `<span class="badge badge-neutral">${v}</span>` },
-                { key: 'action', label: 'Action', render: v => `<span style="font-weight:var(--fw-medium)">${v}</span>` },
-                { key: 'model', label: 'Resource', render: (v, r) => v ? `${v} <span style="color:var(--clr-text-muted);font-size:var(--fs-xs)">#${r.object_id||''}</span>` : '—' },
-                { key: 'ip_address', label: 'IP Address', render: v => `<span style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--clr-text-muted)">${v||'—'}</span>` },
+                { key: 'user', label: 'User', render: (v, r) => \`<span class="badge badge-neutral">\${r.user_details ? r.user_details.email : v}</span>\` },
+                { key: 'action', label: 'Action', render: v => \`<span style="font-weight:var(--fw-medium)">\${v}</span>\` },
+                { key: 'entity_type', label: 'Resource', render: (v, r) => v ? \`\${v} <span style="color:var(--clr-text-muted);font-size:var(--fs-xs)">#\${r.entity_id||''}</span>\` : '—' },
+                { key: 'ip_address', label: 'IP Address', render: v => \`<span style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--clr-text-muted)">\${v||'—'}</span>\` },
+                { key: 'actions', label: '', render: (v, r) => r.entity_type ? \`<button class="btn btn-sm btn-outline" onclick="AuditLogsPage.showTimeline('\${r.entity_type}', '\${r.entity_id}')">\${window.t('View Timeline')}</button>\` : '' }
             ],
             data: logs
         });
+    }
+
+    function showTimeline(entityType, entityId) {
+        Modal.show({
+            title: \`\${window.t('Timeline for')} \${entityType} #\${entityId}\`,
+            content: \`<div id="timeline-modal-container"></div>\`,
+            width: '600px',
+            hideFooter: true
+        });
+        
+        setTimeout(() => {
+            if (window.Timeline) {
+                window.Timeline.render('timeline-modal-container', entityType, entityId);
+            }
+        }, 100);
     }
 
     function applyFilter() {
@@ -71,5 +87,5 @@ const AuditLogsPage = (() => {
         DataExport.exportToCSV('audit_logs_export.csv', headers, dataRows);
     }
 
-    return { render, applyFilter, exportData };
+    return { render, applyFilter, exportData, showTimeline };
 })();

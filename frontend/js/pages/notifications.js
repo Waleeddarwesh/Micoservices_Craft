@@ -63,6 +63,7 @@ const NotificationsPage = (() => {
                         <p dir="auto" style="font-size:var(--fs-sm);${!n.is_read && !n.title ? 'font-weight:var(--fw-semibold)' : 'color:var(--clr-text-secondary)'}">${window.t(n.message)}</p>
                         <div style="display:flex;gap:var(--space-3);margin-top:var(--space-1)">
                             <span style="font-size:var(--fs-xs);color:var(--clr-text-muted)">${n.timestamp ? new Date(n.timestamp).toLocaleString() : ''}</span>
+                            ${n.department ? `<span style="font-size:var(--fs-xs);color:var(--clr-primary)">· ${window.t('Dept')}: ${n.department}</span>` : ''}
                             ${n.user_email ? `<span style="font-size:var(--fs-xs);color:var(--clr-text-muted)">· ${n.user_email}</span>` : ''}
                         </div>
                     </div>

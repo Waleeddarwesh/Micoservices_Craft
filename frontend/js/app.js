@@ -96,6 +96,7 @@
     Router.register('audit-logs', AuditLogsPage.render);
     Router.register('settings', SettingsPage.render);
     Router.register('api-docs', ApiDocsPage.render);
+    Router.register('system-health', SystemHealthPage.render);
 
     // Start router
     Router.init();
