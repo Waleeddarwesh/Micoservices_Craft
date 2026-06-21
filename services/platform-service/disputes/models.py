@@ -4,7 +4,9 @@ from django.utils.translation import gettext_lazy as _
 class Dispute(models.Model):
     class Status(models.TextChoices):
         OPEN = 'open', _('Open')
-        RESOLVED = 'resolved', _('Resolved')
+        INVESTIGATING = 'investigating', _('Investigating')
+        RESOLVED_CUSTOMER = 'resolved_customer', _('Resolved (Customer Win)')
+        RESOLVED_SUPPLIER = 'resolved_supplier', _('Resolved (Supplier Win)')
         CLOSED = 'closed', _('Closed')
 
     customer_id = models.BigIntegerField(verbose_name=_("Customer ID"))

@@ -304,7 +304,7 @@ class BalanceService:
     @transaction.atomic
     def approve_withdrawal(request: BalanceWithdrawRequest, admin_user_id, admin_notes: str):
         admin_user = get_object_or_404(User, id=admin_user_id)
-        if request.transfer_status != BalanceWithdrawRequest.TransferStatus.AWAITING_APPROVAL:
+        if request.transfer_status not in [BalanceWithdrawRequest.TransferStatus.AWAITING_APPROVAL, BalanceWithdrawRequest.TransferStatus.REQUESTED]:
             raise ValidationError(_("This request is not awaiting approval."))
 
         request.transfer_status = BalanceWithdrawRequest.TransferStatus.APPROVED
