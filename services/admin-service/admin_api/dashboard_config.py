@@ -148,6 +148,13 @@ DASHBOARD_MODULES = [
         "icon": "settings",
         "roles": ["is_superuser", "is_supplier", "is_delivery", "is_staff"],
         "permission": None
+    },
+    {
+        "key": "system-health",
+        "label": _("System Health"),
+        "icon": "overview",
+        "roles": ["is_superuser"],
+        "permission": None
     }
 ]
 

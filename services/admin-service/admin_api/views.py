@@ -655,14 +655,30 @@ class AdminWithdrawalsListView(APIView):
 
 
 class AdminNotificationsView(APIView):
-    """List all notifications (system-wide) for admin dashboard."""
+    """List all notifications for the current dashboard user/department."""
     permission_classes = [IsDashboardUser]
 
     def get(self, request):
-        notifs = Notification.objects.select_related('user').order_by('-timestamp')[:200]
+        user = request.user
+        roles = []
+        if hasattr(user, 'roles'):
+            roles = [role.name for role in user.roles.all()]
+        
+        departments = roles[:]
+        if user.is_superuser or 'admin' in roles or 'super_admin' in roles:
+            departments.append('Admin')
+        if 'support' in roles:
+            departments.append('Support')
+            
+        from django.db.models import Q
+        notifs = Notification.objects.filter(
+            Q(user=user) | Q(department__in=departments)
+        ).select_related('user').order_by('-timestamp')[:200]
+        
         data = [{
             'id': n.id,
             'user_email': n.user.email if n.user else '',
+            'department': n.department,
             'message': n.message,
             'is_read': n.is_read,
             'timestamp': n.timestamp.isoformat() if n.timestamp else None,
@@ -950,13 +966,15 @@ class AdminOrderStatusView(APIView):
         return Response({'status': 'updated', 'new_status': order.status})
 
 class AdminSystemHealthView(APIView):
-    """Return system health (DB, Cache)."""
+    """Return system health (DB, Cache, RabbitMQ, Celery)."""
     permission_classes = [IsDashboardUser]
 
     def get(self, request):
         health = {
             "database": "down",
-            "redis": "down"
+            "redis": "down",
+            "rabbitmq": "down",
+            "celery": "down"
         }
         
         # Check DB
@@ -974,6 +992,27 @@ class AdminSystemHealthView(APIView):
             r = redis.from_url(settings.REDIS_URL)
             r.ping()
             health["redis"] = "up"
+        except Exception:
+            pass
+            
+        # Check RabbitMQ
+        try:
+            from celery import Celery
+            app = Celery('Handcrafts')
+            app.config_from_object('django.conf:settings', namespace='CELERY')
+            with app.connection_for_write() as conn:
+                conn.connect()
+                health["rabbitmq"] = "up"
+        except Exception:
+            pass
+            
+        # Check Celery Workers
+        try:
+            from celery import current_app
+            i = current_app.control.inspect()
+            stats = i.stats()
+            if stats:
+                health["celery"] = "up"
         except Exception:
             pass
             

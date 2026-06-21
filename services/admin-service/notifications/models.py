@@ -4,7 +4,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 class Notification(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
+    department = models.CharField(max_length=100, null=True, blank=True, help_text="Target department if user is null")
     message = models.TextField()
     image = models.ImageField(upload_to='notifications/%Y/%m/%d/', null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
