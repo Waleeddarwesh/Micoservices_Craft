@@ -3,7 +3,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.core.cache import cache
 
-from recommendations.models import Interaction
+from recommendations.models import UserProductInteraction
 from accounts.models import Supplier, User
 from disputes.models import Dispute
 from support_tickets.models import Ticket
@@ -13,7 +13,7 @@ from notifications.services import create_notification_for_user
 @shared_task
 def recalculate_recommendations():
     old_date = timezone.now() - timedelta(days=30)
-    Interaction.objects.filter(timestamp__lt=old_date).delete()
+    UserProductInteraction.objects.filter(timestamp__lt=old_date).delete()
     return "Recommendations recalculated and stale data purged."
 
 @shared_task

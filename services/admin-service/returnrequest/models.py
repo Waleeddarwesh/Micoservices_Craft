@@ -44,6 +44,7 @@ class ReturnRequest(models.Model):
     status = models.CharField(max_length=50, choices=ReturnStatus.choices, default=ReturnStatus.NEW)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     reason = models.CharField(max_length=50, choices=ReturnReason.choices)
+    admin_notes = models.TextField(null=True, blank=True)
     image = models.ImageField(upload_to='returns/%Y/%m/%d/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -61,8 +62,10 @@ class ReturnRequest(models.Model):
         self.status = self.ReturnStatus.ACCEPTED
         self.save()
 
-    def reject_by_supplier(self):
+    def reject_by_supplier(self, admin_reason=None):
         self.status = self.ReturnStatus.REJECTED
+        if admin_reason:
+            self.admin_notes = admin_reason
         self.save()
 
     def cancel(self):

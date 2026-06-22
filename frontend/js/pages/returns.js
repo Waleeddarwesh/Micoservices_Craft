@@ -84,14 +84,38 @@ const ReturnsPage = (() => {
     }
 
     async function action(id, act) {
-        const actionText = act === 'accept' ? 'Accept' : 'Reject';
-        Modal.confirm(`${actionText} Return Request`, `Are you sure you want to ${act} this return request?`, async () => {
+        if (act === 'reject') {
+            const body = `
+                <div class="form-group">
+                    <label class="form-label">${window.t('Rejection Reason')}</label>
+                    <textarea id="reject-reason" class="form-input" style="width:100%; height:80px" placeholder="${window.t('Please provide a reason for rejecting this return request...')}"></textarea>
+                </div>
+            `;
+            const footer = `
+                <button class="btn btn-ghost" onclick="Modal.close()">${window.t('Cancel')}</button>
+                <button class="btn btn-danger" onclick="ReturnsPage.submitReject('${id}')">${window.t('Reject')}</button>
+            `;
+            Modal.open(window.t('Reject Return Request'), body, footer);
+            return;
+        }
+
+        Modal.confirm(window.t('Accept Return Request'), window.t('Are you sure you want to accept this return request?'), async () => {
             try {
-                await API.post(`/admin-api/returns/${id}/action/`, { action: act });
-                Toast.success(`Return request ${act}ed successfully`);
+                await API.post(`/admin-api/returns/${id}/action/`, { action: 'accept' });
+                Toast.success(window.t('Return request accepted successfully'));
                 await loadReturns();
             } catch(e) { Toast.error(e.message); }
-        }, actionText, act === 'accept' ? 'success' : 'danger');
+        }, window.t('Accept'), 'success');
+    }
+
+    async function submitReject(id) {
+        const reason = document.getElementById('reject-reason').value.trim();
+        try {
+            await API.post(`/admin-api/returns/${id}/action/`, { action: 'reject', admin_notes: reason });
+            Toast.success(window.t('Return request rejected successfully'));
+            Modal.close();
+            await loadReturns();
+        } catch(e) { Toast.error(e.message); }
     }
 
     async function view(id) {
@@ -104,7 +128,8 @@ const ReturnsPage = (() => {
                 <div class="detail-item"><span class="detail-label">Quantity</span><span class="detail-value">${ret.quantity}</span></div>
                 <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value">EGP ${parseFloat(ret.amount||0).toFixed(2)}</span></div>
                 <div class="detail-item"><span class="detail-label">Reason</span><span class="detail-value">${(ret.reason||'').replace(/_/g,' ')}</span></div>
-                <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value"><span class="badge badge-${STATUS_MAP[ret.status]||'neutral'}">${ret.status}</span></span></div>
+                ${ret.admin_notes ? `<div class="detail-item"><span class="detail-label">${window.t('Rejection Reason')}</span><span class="detail-value">${ret.admin_notes}</span></div>` : ''}
+                <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value"><span class="badge badge-${STATUS_MAP[ret.status]||'neutral'}">${window.t(ret.status)}</span></span></div>
                 <div class="detail-item"><span class="detail-label">Date</span><span class="detail-value">${ret.created_at ? new Date(ret.created_at).toLocaleString() : ''}</span></div>
             </div>
             ${ret.image ? `<div class="mt-4"><img src="${Auth.getApiBase()}${ret.image}" style="max-width:100%;border-radius:var(--radius-md)"/></div>` : ''}`;
@@ -126,5 +151,5 @@ const ReturnsPage = (() => {
         DataExport.exportToCSV('returns_export.csv', headers, dataRows);
     }
 
-    return { render, action, view, applyFilter, exportData };
+    return { render, action, submitReject, view, applyFilter, exportData };
 })();

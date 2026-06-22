@@ -730,7 +730,15 @@ const I18n = (() => {
         "RESOLVED_SUPPLIER": "تم الحل لصالح المورد",
         "Item defective": "منتج معيب",
         "Wrong item sent": "تم إرسال منتج خاطئ",
-        "System Alert": "تنبيه النظام"
+        "System Alert": "تنبيه النظام",
+        "Recipient User Email (Leave 'all' for everyone)": "البريد الإلكتروني للمستلم (اترك 'all' للجميع)",
+        "Attach Image (Optional)": "إرفاق صورة (اختياري)",
+        "Order Update": "تحديث الطلب",
+        "Important Alert": "تنبيه هام",
+        "Rejection Reason": "سبب الرفض",
+        "Please provide a reason for rejecting this return request...": "يرجى تقديم سبب لرفض طلب الإرجاع هذا...",
+        "Return request accepted successfully": "تم قبول طلب الإرجاع بنجاح",
+        "Return request rejected successfully": "تم رفض طلب الإرجاع بنجاح"
 }
 
     function init() {

@@ -2,13 +2,13 @@ from django.contrib import admin
 from .models import Notification
 
 @admin.register(Notification)
-class Notification(admin.ModelAdmin):
-    list_display = ("message", "is_read", "timestamp")
-    list_filter = ("is_read", "timestamp")
-    search_fields = ("message",)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ("message", "user", "department", "is_read", "timestamp")
+    list_filter = ("is_read", "timestamp", "department")
+    search_fields = ("message", "user__email", "user__first_name")
     readonly_fields = ("timestamp",)
     fieldsets = (
-        (None, {"fields": ("message", "is_read")}),
+        (None, {"fields": ("user", "department", "message", "is_read")}),
         ("Date Information", {"fields": ("timestamp",), "classes": ("collapse",)}),
     )
     ordering = ("-timestamp",)

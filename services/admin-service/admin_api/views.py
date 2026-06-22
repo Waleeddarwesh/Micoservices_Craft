@@ -557,6 +557,7 @@ class AdminReturnsView(APIView):
             'quantity': r.quantity,
             'amount': float(r.amount) if r.amount else 0,
             'reason': r.reason,
+            'admin_notes': r.admin_notes,
             'status': r.status,
             'image': r.image.url if r.image else None,
             'created_at': r.created_at.isoformat() if r.created_at else None,
@@ -723,7 +724,22 @@ class AdminNotificationsView(APIView):
 
     def post(self, request):
         """Mark all notifications as read."""
-        Notification.objects.filter(is_read=False).update(is_read=True)
+        user = request.user
+        roles = []
+        if hasattr(user, 'roles'):
+            roles = [role.name for role in user.roles.all()]
+        
+        departments = roles[:]
+        if user.is_superuser or 'admin' in roles or 'super_admin' in roles:
+            departments.append('Admin')
+        if 'support' in roles:
+            departments.append('Support')
+            
+        from django.db.models import Q
+        Notification.objects.filter(
+            Q(user=user) | Q(department__in=departments),
+            is_read=False
+        ).update(is_read=True)
         return Response({'status': 'all marked as read'})
 
 
@@ -910,7 +926,8 @@ class AdminReturnActionView(APIView):
         if action == 'accept':
             ret.approve_by_supplier()
         elif action == 'reject':
-            ret.reject_by_supplier()
+            admin_notes = request.data.get('admin_notes')
+            ret.reject_by_supplier(admin_reason=admin_notes)
         elif action == 'cancel':
             ret.cancel()
         else:

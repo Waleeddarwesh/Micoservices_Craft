@@ -730,7 +730,11 @@ const I18n = (() => {
         "RESOLVED_SUPPLIER": "تم الحل لصالح المورد",
         "Item defective": "منتج معيب",
         "Wrong item sent": "تم إرسال منتج خاطئ",
-        "System Alert": "تنبيه النظام"
+        "System Alert": "تنبيه النظام",
+        "Recipient User Email (Leave 'all' for everyone)": "البريد الإلكتروني للمستلم (اترك 'all' للجميع)",
+        "Order Update": "تحديث الطلب",
+        "Important Alert": "تنبيه هام",
+        "Attach Image (Optional)": "إرفاق صورة (اختياري)"
 }
 
     function init() {

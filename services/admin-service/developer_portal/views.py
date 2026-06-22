@@ -115,11 +115,20 @@ def get_system_status():
     status_data['services'].append({'name': 'Redis Cache & Message Broker', 'status': redis_status})
     
     # 3. Celery Check
-    if redis_status == 'operational':
-        celery_status = 'operational'
-    else:
-        celery_status = 'degraded'
-        
+    celery_status = 'outage'
+    if redis_status != 'outage':
+        try:
+            from celery import current_app
+            i = current_app.control.inspect()
+            stats = i.stats()
+            if stats:
+                celery_status = 'operational'
+        except Exception:
+            pass
+
+    if celery_status == 'outage' and status_data['overall'] == 'operational':
+        status_data['overall'] = 'degraded'
+
     status_data['services'].append({'name': 'Celery Task Workers', 'status': celery_status})
     
     # 4. API Gateway / Core
