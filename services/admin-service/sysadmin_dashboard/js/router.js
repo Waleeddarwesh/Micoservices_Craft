@@ -88,7 +88,7 @@ const Router = (() => {
             item.classList.toggle('active', item.dataset.route === route);
         });
 
-        document.title = `Craft Dashboard — ${pageTitle}`;
+        document.title = `Craft SysAdmin — ${pageTitle}`;
 
         try {
             // Setup a wrapper for the page content, insert breadcrumbs before it
