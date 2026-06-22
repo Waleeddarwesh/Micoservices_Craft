@@ -155,6 +155,97 @@ DASHBOARD_MODULES = [
         "icon": "overview",
         "roles": ["is_superuser"],
         "permission": None
+    },
+    {
+        "key": "servers",
+        "label": _("Servers Inventory"),
+        "icon": "servers",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "services",
+        "label": _("Services Registry"),
+        "icon": "services",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "users-linux",
+        "label": _("Linux User Administration"),
+        "icon": "users",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "system-logs",
+        "label": _("System Logs"),
+        "icon": "audit",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "storage",
+        "label": _("Storage Administration"),
+        "icon": "database",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "backups",
+        "label": _("Backup & Recovery"),
+        "icon": "backup",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "cron-jobs",
+        "label": _("Cron Job Administration"),
+        "icon": "cron",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "security-center",
+        "label": _("Security Center"),
+        "icon": "security",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "config-management",
+        "label": _("Configuration Management"),
+        "icon": "config",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "file-explorer",
+        "label": _("File Explorer"),
+        "icon": "folder",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "containers",
+        "label": _("Container Operations"),
+        "icon": "docker",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "incidents",
+        "label": _("Incident Management"),
+        "icon": "alert",
+        "roles": ["is_superuser"],
+        "permission": None
+    },
+    {
+        "key": "automation",
+        "label": _("Operational Scripts"),
+        "icon": "code",
+        "roles": ["is_superuser"],
+        "permission": None
     }
 ]
 

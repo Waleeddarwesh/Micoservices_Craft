@@ -117,6 +117,7 @@ LOCAL_APPS = [
     'reviews',
     'support_tickets',
     'workflows',
+    'system_admin',
 ]
 
 INSTALLED_APPS = THIRD_PARTY_APPS + DJANGO_APPS + LOCAL_APPS
@@ -140,6 +141,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_prometheus.middleware.PrometheusAfterMiddleware',
     'accounts.middleware.ForcePasswordChangeMiddleware',
+    'system_admin.middleware.SystemAdminAuditMiddleware',
 ]
 
 

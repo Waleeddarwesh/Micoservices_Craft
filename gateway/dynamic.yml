@@ -112,7 +112,7 @@ http:
 
     # Unified Admin Service Routers
     admin_api_router:
-      rule: "PathPrefix(`/admin-api/`) || PathPrefix(`/admin-schema.json`)"
+      rule: "PathPrefix(`/admin-api/`) || PathPrefix(`/admin-schema.json`) || PathPrefix(`/api/workflows/`) || PathPrefix(`/api/audit/`) || PathPrefix(`/api/notifications-system/`) || PathPrefix(`/api/system-admin/`)"
       service: admin_service
       priority: 150
       entryPoints:
@@ -123,6 +123,13 @@ http:
         
     dashboard_router:
       rule: "PathPrefix(`/dashboard/`)"
+      service: admin_service
+      priority: 150
+      entryPoints:
+        - web
+
+    sysadmin_router:
+      rule: "PathPrefix(`/sysadmin/`)"
       service: admin_service
       priority: 150
       entryPoints:

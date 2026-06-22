@@ -143,6 +143,47 @@ def dashboard_view(request, path='index.html'):
             return response
 
 
+def sysadmin_dashboard_view(request, path='index.html'):
+    """Serve the dedicated sysadmin portal SPA files."""
+    dashboard_dir = os.path.join(settings.BASE_DIR, 'sysadmin_dashboard')
+    file_path = os.path.normpath(os.path.join(dashboard_dir, path))
+
+    # Security: prevent directory traversal
+    if not file_path.startswith(os.path.normpath(dashboard_dir)):
+        raise Http404
+
+    if not os.path.isfile(file_path):
+        raise Http404
+
+    content_types = {
+        '.html': 'text/html; charset=utf-8',
+        '.css': 'text/css; charset=utf-8',
+        '.js': 'application/javascript; charset=utf-8',
+        '.svg': 'image/svg+xml',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.ico': 'image/x-icon',
+        '.json': 'application/json',
+        '.woff2': 'font/woff2',
+        '.woff': 'font/woff',
+    }
+    ext = os.path.splitext(path)[1].lower()
+    content_type = content_types.get(ext, 'application/octet-stream')
+
+    if ext in ('.png', '.jpg', '.ico', '.woff2', '.woff'):
+        with open(file_path, 'rb') as f:
+            return HttpResponse(f.read(), content_type=content_type)
+    else:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            response = HttpResponse(f.read(), content_type=content_type)
+            if ext == '.html':
+                response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response['Pragma'] = 'no-cache'
+                response['Expires'] = '0'
+            return response
+
+
+
 # =============================================================================
 # KPI Stats & Chart Endpoints
 # =============================================================================
@@ -284,8 +325,16 @@ class AdminChartsView(APIView):
             total=Sum('order__final_amount')
         ).order_by('month')
 
-        revenue_labels = [m['month'].strftime('%b') for m in monthly]
-        revenue_data = [float(m['total'] or 0) for m in monthly]
+        # Pad with zeros for the last 6 months to ensure a trend line can be drawn
+        from dateutil.relativedelta import relativedelta
+        now = timezone.now()
+        last_6_months_dates = [now - relativedelta(months=i) for i in range(5, -1, -1)]
+        last_6_months_labels = [d.strftime('%b') for d in last_6_months_dates]
+        
+        results_map = {m['month'].strftime('%b'): float(m['total'] or 0) for m in monthly if m['month']}
+        
+        revenue_labels = last_6_months_labels
+        revenue_data = [results_map.get(label, 0.0) for label in last_6_months_labels]
 
         # Order status distribution
         statuses_qs = Order.objects.all()
@@ -1664,6 +1713,7 @@ class AdminProductModerationActionView(APIView):
         
         product = get_object_or_404(Product, pk=pk)
         action = request.data.get('action')
+        reason = request.data.get('reason', '')
         
         if action == 'approve':
             product.publish_status = Product.PublishStatus.APPROVED
@@ -1671,7 +1721,11 @@ class AdminProductModerationActionView(APIView):
             return Response({'status': 'approved'})
         elif action == 'reject':
             product.publish_status = Product.PublishStatus.REJECTED
-            product.save(update_fields=['publish_status'])
+            if reason:
+                product.rejection_reason = reason
+                product.save(update_fields=['publish_status', 'rejection_reason'])
+            else:
+                product.save(update_fields=['publish_status'])
             return Response({'status': 'rejected'})
             
         return Response({'error': 'Invalid action'}, status=400)

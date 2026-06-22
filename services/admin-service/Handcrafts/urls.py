@@ -18,7 +18,7 @@ class IsSuperUser(permissions.BasePermission):
 
 from django.conf.urls.i18n import i18n_patterns
 
-from admin_api.views import dashboard_view
+from admin_api.views import dashboard_view, sysadmin_dashboard_view
 
 from django.views.generic import RedirectView
 
@@ -130,11 +130,17 @@ urlpatterns = [
     # Internal Notifications (Phase 6)
     path('api/notifications-system/', include('notifications.urls')),
     
+    # System Administration Portal
+    path('api/system-admin/', include('system_admin.urls')),
+    
     # Craft Developer Portal
     path('developer/', include('developer_portal.urls')),
 
     path('dashboard/', dashboard_view, {'path': 'index.html'}, name='dashboard-login'),
     path('dashboard/<path:path>', dashboard_view, name='dashboard-file'),
+
+    path('sysadmin/', sysadmin_dashboard_view, {'path': 'index.html'}, name='sysadmin-login'),
+    path('sysadmin/<path:path>', sysadmin_dashboard_view, name='sysadmin-file'),
 
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
