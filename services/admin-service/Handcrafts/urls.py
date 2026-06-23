@@ -25,7 +25,6 @@ from django.views.generic import RedirectView
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect, render
 from django.http import HttpResponseForbidden
-from accounts.views import admin_profile_settings
 
 def check_docs_token(view_func):
     def wrapped_view(request, *args, **kwargs):
@@ -117,7 +116,6 @@ urlpatterns = [
     path('docs/', check_docs_token(TemplateView.as_view(template_name='admin/central_docs.html')), name='schema-swagger-ui'),
     path('docs/login/', docs_login_view, name='docs-login'),
     path('docs/logout/', docs_logout_view, name='docs-logout'),
-    path('admin/profile-settings/', admin_profile_settings, name='admin_profile_settings'),
     path('admin/', admin.site.urls),
 
     # Admin API & Dashboard
@@ -127,8 +125,6 @@ urlpatterns = [
     path('api/workflows/', include('workflows.urls')),
     path('api/audit/', include('audit_logs.urls')),
     
-    # Internal Notifications (Phase 6)
-    path('api/notifications-system/', include('notifications.urls')),
     
     # System Administration Portal
     path('api/system-admin/', include('system_admin.urls')),

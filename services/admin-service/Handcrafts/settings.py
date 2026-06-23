@@ -84,11 +84,8 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    'modeltranslation',
-    'channels',
     'colorfield',
     'corsheaders',
-    'daphne',
     'django_celery_beat',
     'django_filters',
     'django_prometheus',
@@ -96,26 +93,13 @@ THIRD_PARTY_APPS = [
     'drf_spectacular',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
-    'social_django',
     'whitenoise.runserver_nostatic',
 ]
 
 LOCAL_APPS = [
-    'accounts',
     'admin_api',
     'audit_logs',
-    'chatapp',
-    'course',
     'developer_portal',
-    'disputes',
-    'notifications',
-    'orders',
-    'payment',
-    'products',
-    'recommendations',
-    'returnrequest',
-    'reviews',
-    'support_tickets',
     'workflows',
     'system_admin',
 ]
@@ -140,21 +124,19 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_prometheus.middleware.PrometheusAfterMiddleware',
-    'accounts.middleware.ForcePasswordChangeMiddleware',
     'system_admin.middleware.SystemAdminAuditMiddleware',
 ]
 
 
 # ==============================================================================
-# AUTHENTICATION & SOCIAL AUTH
+# AUTHENTICATION
 # ==============================================================================
 
-AUTH_USER_MODEL = 'accounts.User'
+# Using default Django User model for Admin Service superusers
+# Authenticaton API flows are handled by the Auth Service
 
 AUTHENTICATION_BACKENDS = [
-    'social_core.backends.google.GoogleOAuth2',
-    'social_core.backends.facebook.FacebookOAuth2',
-    'accounts.backends.CaseInsensitiveModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -163,31 +145,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
-
-# --- Social Auth Settings ---
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/accounts/social-complete/'
-SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/accounts/social-complete/'
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('GOOGLE_CLIENT_ID', default='')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('GOOGLE_CLIENT_SECRET', default='')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
-    'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile',
-]
-SOCIAL_AUTH_PASSWORD = env('SOCIAL_AUTH_PASSWORD', default='craft-social-login')
-SOCIAL_AUTH_FACEBOOK_KEY = env('SOCIAL_AUTH_FACEBOOK_KEY', default='')
-SOCIAL_AUTH_FACEBOOK_SECRET = env('SOCIAL_AUTH_FACEBOOK_SECRET', default='')
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'public_profile']
-SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
-    'fields': 'id, name, email, first_name, last_name'
-}
-SOCIAL_AUTH_PIPELINE = (
-    'social_core.pipeline.social_auth.social_details',
-    'social_core.pipeline.social_auth.social_uid',
-    'social_core.pipeline.social_auth.auth_allowed',
-    'social_core.pipeline.social_auth.social_user',
-    'social_core.pipeline.user.get_username',
-    'accounts.pipeline.create_temp_user',
-)
 
 
 # ==============================================================================
@@ -324,22 +281,7 @@ else:
 
 REDIS_URL = env('REDIS_URL', default='redis://localhost:6379/0')
 
-# --- Channels configuration ---
-if ENVIRONMENT == 'development':
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer"
-        }
-    }
-else:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [REDIS_URL],
-            },
-        },
-    }
+# --- Channels configuration removed ---
 
 # --- Caching configuration ---
 if ENVIRONMENT == 'development':
@@ -373,17 +315,6 @@ CELERY_TASK_EAGER_PROPAGATES = True
 
 # --- Celery Beat Scheduler ---
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-# CELERY_BEAT_SCHEDULE = {
-#     'update-recommendations-daily': {
-#         'task': 'recommendations.tasks.update_recommendations_task',
-#         'schedule': crontab(hour=1, minute=30),
-#     },
-#     'cancel-pending-orders': {
-#         'task': 'orders.tasks.cancel_pending_credit_card_orders_task',
-#         'schedule': crontab(hour=0, minute=0),
-#     },
-# }
-
 
 # ==============================================================================
 # STATIC & MEDIA FILES
