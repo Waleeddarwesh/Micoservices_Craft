@@ -718,12 +718,14 @@
    font-family: var(--font-family);
    background: linear-gradient(90deg, #fff, var(--clr-text-secondary));
    -webkit-background-clip: text;
+   background-clip: text;
    -webkit-text-fill-color: transparent;
 }
 
 [data-theme="light"] .stat-card-value {
    background: linear-gradient(90deg, #111, var(--clr-text-secondary));
    -webkit-background-clip: text;
+   background-clip: text;
    -webkit-text-fill-color: transparent;
 }
 
