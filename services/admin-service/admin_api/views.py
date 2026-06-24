@@ -104,8 +104,8 @@ class DashboardIdentityView(APIView):
 # =============================================================================
 
 def dashboard_view(request, path='index.html'):
-    """Serve the admin dashboard SPA files (HTML, CSS, JS)."""
-    dashboard_dir = os.path.join(settings.BASE_DIR, 'dashboard')
+    """Serve the dashboard single page application."""
+    dashboard_dir = os.path.join(settings.BASE_DIR, 'frontend', 'dashboard')
     file_path = os.path.normpath(os.path.join(dashboard_dir, path))
 
     # Security: prevent directory traversal
@@ -144,8 +144,8 @@ def dashboard_view(request, path='index.html'):
 
 
 def sysadmin_dashboard_view(request, path='index.html'):
-    """Serve the dedicated sysadmin portal SPA files."""
-    dashboard_dir = os.path.join(settings.BASE_DIR, 'sysadmin_dashboard')
+    """Serve the system admin dashboard single page application."""
+    dashboard_dir = os.path.join(settings.BASE_DIR, 'frontend', 'sysadmin_dashboard')
     file_path = os.path.normpath(os.path.join(dashboard_dir, path))
 
     # Security: prevent directory traversal

@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import User # Assuming User is in accounts app based on settings.py
+from django.contrib.auth.models import User
 
 class Server(models.Model):
     hostname = models.CharField(max_length=255, unique=True)

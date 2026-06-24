@@ -242,7 +242,7 @@ ASGI_APPLICATION = 'Handcrafts.asgi.application'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'frontend', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -280,8 +280,6 @@ else:
 # ==============================================================================
 
 REDIS_URL = env('REDIS_URL', default='redis://localhost:6379/0')
-
-# --- Channels configuration removed ---
 
 # --- Caching configuration ---
 if ENVIRONMENT == 'development':
@@ -328,7 +326,7 @@ else:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_MANIFEST_STRICT = False
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend', 'static')]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
