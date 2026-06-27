@@ -8,6 +8,8 @@ from django.views.csrf import csrf_failure as default_csrf_failure
 
 def custom_csrf_failure(request, reason=""):
     if 'logout' in request.path:
+        if 'developer' in request.path:
+            return redirect('/developer/login/')
         return redirect('/admin/login/')
     return default_csrf_failure(request, reason=reason)
 

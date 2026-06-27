@@ -8,10 +8,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import DeveloperAPIKey, WebhookEndpoint, WebhookDelivery, ChangelogEntry, APIService
 from .services import create_api_key, verify_api_key, revoke_api_key, create_webhook_endpoint
 
-def is_superuser(user):
-    return user.is_authenticated and user.is_superuser
+def is_developer(user):
+    return user.is_authenticated and getattr(user, 'is_team_developer', False)
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 def overview(request):
     total_deliveries = WebhookDelivery.objects.filter(endpoint__owner=request.user).count()
     successful_deliveries = WebhookDelivery.objects.filter(endpoint__owner=request.user, success=True).count()
@@ -36,7 +36,7 @@ def overview(request):
     }
     return render(request, 'admin/developer/overview.html', context)
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 def api_catalog(request):
     services = APIService.objects.filter(is_active=True).order_by('name')
     context = {
@@ -45,7 +45,7 @@ def api_catalog(request):
     }
     return render(request, 'admin/developer/catalog.html', context)
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 def api_explorer(request):
     refresh = RefreshToken.for_user(request.user)
     refresh['roles'] = ['admin'] if request.user.is_superuser else []
@@ -59,22 +59,22 @@ def api_explorer(request):
     }
     return render(request, 'admin/developer/explorer.html', context)
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 def getting_started(request):
     return render(request, 'admin/developer/getting_started.html', {'active_tab': 'getting-started'})
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 def authentication(request):
     return render(request, 'admin/developer/authentication.html', {'active_tab': 'authentication'})
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 def webhooks_page(request):
     endpoints = WebhookEndpoint.objects.filter(owner=request.user).prefetch_related(
         Prefetch('deliveries', queryset=WebhookDelivery.objects.order_by('-created_at'), to_attr='recent_deliveries')
     ).order_by('-created_at')
     return render(request, 'admin/developer/webhooks.html', {'active_tab': 'webhooks', 'endpoints': endpoints})
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 def changelog(request):
     entries = ChangelogEntry.objects.all()
     return render(request, 'admin/developer/changelog.html', {'active_tab': 'changelog', 'entries': entries})
@@ -137,7 +137,7 @@ def get_system_status():
     status_data['uptime_90d'] = "99.98%"
     return status_data
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 def api_status(request):
     system_status = get_system_status()
     return render(request, 'admin/developer/status.html', {
@@ -146,18 +146,18 @@ def api_status(request):
         'system_status_json': json.dumps(system_status)
     })
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 def api_status_json(request):
     return JsonResponse(get_system_status())
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 def api_keys_page(request):
     keys = DeveloperAPIKey.objects.filter(owner=request.user).order_by('-created_at')
     return render(request, 'admin/developer/api_keys.html', {'active_tab': 'api-keys', 'keys': keys})
 
 # AJAX Endpoints
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 @require_http_methods(["POST"])
 def create_api_key_view(request):
     try:
@@ -187,7 +187,7 @@ def create_api_key_view(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 @require_http_methods(["POST"])
 def revoke_api_key_view(request, pk):
     try:
@@ -197,7 +197,7 @@ def revoke_api_key_view(request, pk):
     except DeveloperAPIKey.DoesNotExist:
         return JsonResponse({'error': 'API key not found'}, status=404)
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 @require_http_methods(["POST"])
 def create_webhook_view(request):
     try:
@@ -226,7 +226,7 @@ def create_webhook_view(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 @require_http_methods(["DELETE"])
 def delete_webhook_view(request, pk):
     try:
@@ -238,7 +238,7 @@ def delete_webhook_view(request, pk):
 
 from .tasks import send_webhook_delivery
 
-@user_passes_test(is_superuser, login_url='/docs/login/')
+@user_passes_test(is_developer, login_url='/developer/login/')
 @require_http_methods(["POST"])
 def test_webhook_view(request, pk):
     try:

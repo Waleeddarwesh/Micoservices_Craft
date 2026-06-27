@@ -100,7 +100,6 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     'admin_api',
-    'audit_logs',
     'developer_portal',
     'workflows',
     'system_admin',
