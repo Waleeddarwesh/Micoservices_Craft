@@ -110,3 +110,11 @@ class WishlistViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user_id=self.request.user.id)
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class InternalOrderCountView(APIView):
+    permission_classes = []
+    def get(self, request):
+        count = Order.objects.count()
+        return Response({'count': count})

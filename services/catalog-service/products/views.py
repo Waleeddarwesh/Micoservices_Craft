@@ -152,3 +152,11 @@ class CollectionViewSet(viewsets.ModelViewSet):
         if self.action in ("list", "retrieve"):
             return [AllowAny()]
         return [IsAuthenticated(), HasRole("supplier")]
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+class InternalProductCountView(APIView):
+    permission_classes = []
+    def get(self, request):
+        count = Product.objects.count()
+        return Response({'count': count})

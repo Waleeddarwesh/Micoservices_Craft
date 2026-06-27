@@ -2,7 +2,7 @@ from django.contrib import admin
 from .views import RegisterViewforCustomer,VerifyUserEmail,RegisterViewforSupplier,RegisterViewforDelivery,SupplierProfileAPIView
 from .views import LoginUserView,PasswordResetRequestView,SetNewPasswordView,LogoutApiView,social_complete_view
 from . views import CustomerProfileAPIView, DeliveryProfileAPIView,SuppliersList,SupplierDetail,FollowSupplier,TrendingSuppliersAPIView,AddressViewSet,SupplierDocumentViewSet
-from .views import deliveryDocumentViewSet,ResendOtp,CheckOTPValidity,SocialAccountCompleteView,social_login_page_view,PaymentCardViewSet,FCMTokenUpdateView, ExportDataView, DeleteAccountView
+from .views import deliveryDocumentViewSet,ResendOtp,CheckOTPValidity,SocialAccountCompleteView,social_login_page_view,PaymentCardViewSet,FCMTokenUpdateView, ExportDataView, DeleteAccountView, InternalUserCountView
 from django.urls import path , include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -38,6 +38,7 @@ urlpatterns = [
     path('update-fcm-token/', FCMTokenUpdateView.as_view(), name='update_fcm_token'),
     path('export-data/', ExportDataView.as_view(), name='export-data'),
     path('delete-account/', DeleteAccountView.as_view(), name='delete-account'),
+    path('internal/users/count/', InternalUserCountView.as_view(), name='internal-users-count'),
     path('', include(router.urls)),
 
 ]
