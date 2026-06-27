@@ -51,6 +51,16 @@ services:
     restart: unless-stopped
 
   # Microservices
+  frontend_service:
+    networks:
+      default:
+        aliases:
+          - frontend-service
+    build:
+      context: ./services/frontend-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+
   admin_service:
     networks:
       default:

@@ -27,8 +27,6 @@ class IsSuperUser(permissions.BasePermission):
 
 from django.conf.urls.i18n import i18n_patterns
 
-from admin_api.views import dashboard_view, sysadmin_dashboard_view
-
 from django.views.generic import RedirectView
 
 from django.contrib.auth import authenticate, login, logout
@@ -174,12 +172,6 @@ urlpatterns = [
     path('developer/login/', developer_login_view, name='developer-login'),
     path('developer/logout/', developer_logout_view, name='developer-logout'),
     path('developer/', include('developer_portal.urls')),
-
-    path('dashboard/', dashboard_view, {'path': 'index.html'}, name='dashboard-login'),
-    path('dashboard/<path:path>', dashboard_view, name='dashboard-file'),
-
-    path('sysadmin/', sysadmin_dashboard_view, {'path': 'index.html'}, name='sysadmin-login'),
-    path('sysadmin/<path:path>', sysadmin_dashboard_view, name='sysadmin-file'),
 
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),

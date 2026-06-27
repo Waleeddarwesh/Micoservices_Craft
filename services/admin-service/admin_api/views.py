@@ -201,34 +201,4 @@ class AdminWithdrawalActionView(APIView):
 class AdminReviewModerationView(APIView):
     def post(self, request, *args, **kwargs):
         return Response({'message': 'Proxied AdminReviewModerationView POST not fully implemented yet'})
-import os
-from django.conf import settings
-from django.http import HttpResponse, Http404
 
-def dashboard_view(request, path='index.html'):
-    dashboard_dir = os.path.join(settings.BASE_DIR, 'frontend', 'dashboard')
-    file_path = os.path.normpath(os.path.join(dashboard_dir, path))
-
-    if not file_path.startswith(os.path.normpath(dashboard_dir)):
-        raise Http404
-    if not os.path.isfile(file_path):
-        raise Http404
-
-    ext = os.path.splitext(path)[1].lower()
-    content_types = {
-        '.html': 'text/html; charset=utf-8',
-        '.css': 'text/css; charset=utf-8',
-        '.js': 'application/javascript; charset=utf-8',
-        '.json': 'application/json',
-    }
-    content_type = content_types.get(ext, 'application/octet-stream')
-
-    if ext in ('.png', '.jpg', '.ico', '.woff2', '.woff'):
-        with open(file_path, 'rb') as f:
-            return HttpResponse(f.read(), content_type=content_type)
-    else:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            response = HttpResponse(f.read(), content_type=content_type)
-            if ext == '.html':
-                response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-            return response

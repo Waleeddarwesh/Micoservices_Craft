@@ -92,7 +92,7 @@ services:
     environment:
       RABBIT_URL: "http://rabbitmq:15672"
       RABBIT_USER: "guest"
-      RABBIT_PASSWORD: "guest"
+      RABBIT_PASSWORD: "${RABBITMQ_DEFAULT_PASS:-guest}"
     ports:
       - "9419:9419"
     depends_on:

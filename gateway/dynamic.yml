@@ -123,14 +123,14 @@ http:
         
     dashboard_router:
       rule: "PathPrefix(`/dashboard/`)"
-      service: admin_service
+      service: frontend_service
       priority: 150
       entryPoints:
         - web
 
     sysadmin_router:
       rule: "PathPrefix(`/sysadmin/`)"
-      service: admin_service
+      service: frontend_service
       priority: 150
       entryPoints:
         - web
@@ -169,7 +169,7 @@ http:
     frontend_service:
       loadBalancer:
         servers:
-          - url: "http://frontend:80"
+          - url: "http://frontend_service:80"
 
     realtime_service:
       loadBalancer:
