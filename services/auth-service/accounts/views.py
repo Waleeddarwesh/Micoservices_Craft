@@ -788,7 +788,9 @@ class DeleteAccountView(APIView):
         user.is_active = False
         user.save()
         
-        return Response({"status": _("Account successfully deleted (soft delete)")}, status=status.HTTP_200_OK)class InternalUserCountView(APIView):
+        return Response({"status": _("Account successfully deleted (soft delete)")}, status=status.HTTP_200_OK)
+
+class InternalUserCountView(APIView):
     permission_classes = []
     def get(self, request):
         count = User.objects.count()
